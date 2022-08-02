@@ -49,8 +49,8 @@ class FComponent extends Command
         'Database' => [
             'type'=>'database',
             'files'=>[
-                ['migration'=>'Database/migrations/migrations.php'],
-                ['seeder'=>'Database/seeders/seeders.php'],
+                ['migration'=>'Database/migrations/Migration.php'],
+                ['seeder'=>'Database/seeders/Seeders.php'],
             ]
         ],
         'Models' => [
@@ -105,7 +105,7 @@ class FComponent extends Command
             $this->info('Component Name Missing');
         } else {
             $ask = $this->ask('What Is The Count Of Your Inputs');
-            if(lcfirst($ask) == null) {
+            if(lcfirst($ask) == null || !is_numeric($ask)) {
                 $this->info("Not Choosen");
                 $this->info("------------------");
                 die;
@@ -165,16 +165,20 @@ class FComponent extends Command
         // foreach($map as $val) {
         //     unset($stubMap[$val]);
         // }
-
-        $ask = $this->ask('You Want Make Translate ? [Y | N]');
-        if(lcfirst($ask) == null) {
-            $this->info("Not Choosen");
-            $this->info("------------------");
-            die;
+        foreach($this->inputs as $input){
+            if ($input['trans'] == 'y') {
+                $this->translate = true;
+            }
         }
-        if(lcfirst($ask) == 'y') {
-            $this->translate = true;
-        }
+        // $ask = $this->ask('You Want Make Translate ? [Y | N]');
+        // if(lcfirst($ask) == null) {
+        //     $this->info("Not Choosen");
+        //     $this->info("------------------");
+        //     die;
+        // }
+        // if(lcfirst($ask) == 'y') {
+        //     $this->translate = true;
+        // }
         if (count($stubMap) == 0) {
             $this->info("Component Create Stop");
             die;
@@ -345,16 +349,16 @@ class FComponent extends Command
     }
 
     protected function databaseFunction($value) {
-        $path = app_path('Components').'/'.$this->argument('name');
+        $path = app_path('Components').'\\'.$this->argument('name');
         foreach($value as $val) {
             if (isset($val['migration'])) {
                 $dir = explode('/',$val['migration']);
                 unset($dir[count($dir)-1]);
                 $dir = implode('/',$dir);
-                if (! is_dir($directory = $path.'/'.$dir)) {
+                if (!is_dir($directory = $path.'\\'.$dir)) {
                     mkdir($directory, 0755, true);
                 }
-                $val = str_replace('migrations',$this->argument('name'),$val['migration']);
+                $val = str_replace('Migration',$this->argument('name'),$val['migration']);
                 $val = str_replace(
                     $this->argument('name').'.php',
                     date('Y_m_d').'_'.rand(000000,999999).'_create_'.lcfirst($this->argument('name').'_table.php'),
@@ -362,12 +366,12 @@ class FComponent extends Command
                 );
                 if($this->translate != true) {
                     file_put_contents(
-                        $path.'/'.$val,
+                        $path.'\\'.$val,
                         $this->compileMigrateStub('migrataion',$dir)
                     );
                 } else {
                     file_put_contents(
-                        $path.'/'.$val,
+                        $path.'\\'.$val,
                         $this->compileMigrateStub('migrataion',$dir,'_translate')
                     );
                 }
@@ -378,10 +382,10 @@ class FComponent extends Command
                 if (!is_dir($directory = $path.'/'.$dir)) {
                     mkdir($directory, 0755, true);
                 }
-                $val = str_replace('seeders',$this->argument('name').'Seeder',$val['seeder']);
+                $val = str_replace('Seeders',$this->argument('name').'Seeder',$val['seeder']);
                 file_put_contents(
                     $path.'/'.$val,
-                    $this->compileMigrateStub('sedder',$dir)
+                    $this->compileMigrateStub('seeder',$dir)
                 );
             }
         }
@@ -395,7 +399,7 @@ class FComponent extends Command
             $table_name  = lcfirst($this->argument('name'));
             $table_id    = rtrim($table_name,'s');
             foreach($this->inputs as $input){
-                if ($input['trans'] == 'y') {
+                if ($input['trans'] == "y") {
                     if (in_array($input['type'], ['string' ,'text' ,'bigText'])) {
                         $inputs_trans .= '$table->'.$input['type'].'(\''.$input['name'].'\')->nullable();'."\r\n";
                     }else{
