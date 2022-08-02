@@ -1,0 +1,7 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+// Namespaces
+
+// {{name}}
+Route::resource('{{name}}', {{directory}}::class);

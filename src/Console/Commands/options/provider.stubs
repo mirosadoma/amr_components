@@ -1,0 +1,130 @@
+<?php
+
+namespace {{namespace}};
+
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Route;
+
+class Provider extends ServiceProvider
+{
+    protected $Namespace = '{{ComponentPath}}';
+
+    public function register() {
+
+    }
+
+    public function boot() {
+        $this->webArtisanMigration();
+        $this->loadHelpers();
+        $this->parseViewConfig();
+        if(request()->is('*app*')) {
+            $this->loadWebRoutesDashboard();
+            view()->addNamespace('DCommon', _fixDirSeparator(__DIR__ . '/Common/View/Dashboard'));
+        } else {
+            $this->loadWebRoutesFrontEnd();
+            view()->addNamespace('DCommon', _fixDirSeparator(__DIR__ . '/Common/View/Frontend'));
+        }
+    }
+
+    private function loadHelpers() {
+        require __DIR__ . '/helpers.php';
+    }
+
+    private function webArtisan() {
+        Route::get('/web-artisan/{command}', function ($command) {
+            try {
+                $res = \Artisan::call($command);
+            } catch (\Symfony\Component\Console\Exception\CommandNotFoundException $exc) {
+                die('<pre>' . $exc->getMessage() . '</pre>');
+            }
+            die;
+            $oldKey = file_get_contents(__DIR__ . '/artisan_key');
+            if (trim($key) == $oldKey) {
+                try {
+                    Artisan::call($command);
+                    $newKey = str_random(60);
+                    file_put_contents(__DIR__ . '/artisan_key', $newKey);
+                    return "<pre>Done <br/>New key: $newKey</pre>";
+                } catch (\Symfony\Component\Console\Exception\CommandNotFoundException $exc) {
+                    die('<pre>' . $exc->getMessage() . '</pre>');
+                }
+            }
+            return 'Ha Ha Ha!!!';
+        });
+    }
+
+    private function webArtisanMigration() {
+        foreach (glob(__DIR__ . '/**/Migration/*.php') as $file) {
+            $file = str_replace('/','\\',$file);
+            $this->loadMigrationsFrom($file);
+        }
+    }
+
+    public function authRoute() {
+        Route::middleware('web')->prefix('dashboard')->group(function () {
+            Route::get('/logout', 'App\Components\Common\Controller\Dashboard\AuthController@Logout')->name('Dlogout');
+            Route::prefix('login')->group(function () {
+                Route::get('/', 'App\Components\Common\Controller\Dashboard\AuthController@login')->name('login');
+                Route::post('/', 'App\Components\Common\Controller\Dashboard\AuthController@loginAuth')->name('loginCheck');
+            });
+        });
+    }
+
+    public function loadWebRoutesFrontEnd() {
+        $middlewares = [
+                'web',
+                'localize' => \Mcamara\LaravelLocalization\Middleware\LaravelLocalizationRoutes::class,
+                'localizationRedirect' => \Mcamara\LaravelLocalization\Middleware\LaravelLocalizationRedirectFilter::class,
+                'localeSessionRedirect' => \Mcamara\LaravelLocalization\Middleware\LocaleSessionRedirect::class,
+                'localeViewPath' => \Mcamara\LaravelLocalization\Middleware\LaravelLocalizationViewPath::class
+        ];
+        $r = \Route::middleware($middlewares)
+                ->prefix(\LaravelLocalization::setLocale())
+                ->namespace($this->Namespace);
+        $r->group(__DIR__ . '/Common/Route/Front.php');
+        foreach (glob(__DIR__ . '/**/Route/Front.php') as $file) {
+            $r->group($file);
+        }
+        return $r;
+    }
+
+    public function loadApiRoute() {
+        $api = \Route::middleware(['api'])
+                ->prefix('api')
+                ->namespace($this->Namespace);
+        foreach (glob(__DIR__ . '/**/Route/Api.php') as $file) {
+            $api->group($file);
+        }
+        return $api;
+    }
+
+    public function loadWebRoutesDashboard() {
+        $this->authRoute();
+        $dashboard = \Route::middleware(['web','auth'])
+                ->prefix('dashboard')
+                ->name('dashboard.')
+                ->namespace($this->Namespace);
+        foreach (glob(__DIR__ . '/**/Route/Dashboard.php') as $file) {
+            $dashboard->group($file);
+        }
+        return $dashboard;
+    }
+
+
+    public function parseViewConfig() {
+        $path  = request()->path();
+        $path  = explode('/',$path);
+        $path  = (array_key_exists(1,$path))?ucfirst($path[1]):'Common';
+        $array = [];
+        if($path != '') {
+            if(is_dir(app_path("/Components/{$path}/Resources/view"))) {
+                $path  = app_path("/Components/{$path}/Resources/view/view.json");
+                $json  = file_get_contents($path);
+                $array = json_decode($json,true);
+            }
+        }
+        view()->share('view_config',$array);
+    }
+
+
+}

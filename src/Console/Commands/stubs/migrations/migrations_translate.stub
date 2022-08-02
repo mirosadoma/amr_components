@@ -1,0 +1,48 @@
+<?php
+
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+class {{migrate}} extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('{{table_name}}', function (Blueprint $table) {
+            $table->id();
+            $table->string('image')->nullable();
+            $table->tinyInteger('is_active')->default(0);
+            {{inputs}}
+            $table->timestamps();
+        });
+
+        Schema::create('{{table_name}}_translations', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('{{table_id}}_id');
+            $table->foreign('{{table_id}}_id')->references('id')->on('{{table_name}}')->onUpdate('cascade')->onDelete('cascade');
+            $table->string('locale')->index();
+            $table->unique(['{{table_id}}_id', 'locale']);
+            {{inputs_trans}}
+            $table->timestamps();
+        });
+
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        \DB::statement('SET FOREIGN_KEY_CHECKS = 0');
+        Schema::dropIfExists('{{table_name}}');
+        Schema::dropIfExists('{{table_name}}_translations');
+        \DB::statement('SET FOREIGN_KEY_CHECKS = 1');
+    }
+}

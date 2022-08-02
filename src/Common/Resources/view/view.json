@@ -1,0 +1,9 @@
+{
+    "styles": [],
+    "scripts": [
+        "plugins/visualization/echarts/echarts.js",
+        "charts/echarts/lines_areas.js"
+    ],
+    "footer_scripts": [
+    ]
+}

@@ -1,0 +1,13 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+// Locales Area
+Route::prefix('/{{name}}')->name('{{name}}.')->group(function () {
+    Route::resource('locales', LocalesController::class);
+});
+
+// {{name}} Area
+Route::resource('{{name}}', {{directory}}::class);
+Route::get('{{name}}/remove_image/{{model_obj}}', [{{directory}}::class, 'remove_image'])->name('{{name}}.remove_image');
+Route::get('{{name}}/is_active/{{model_obj}}', [{{directory}}::class, 'is_active'])->name('{{name}}.is_active');

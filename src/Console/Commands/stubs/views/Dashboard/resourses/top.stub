@@ -1,0 +1,8 @@
+<?php
+
+return [
+    'title'         => __('Add {{model_name_big}}'),
+    'url'           => route('app.{{model_name_small}}.create'),
+    'icon'          => 'plus',
+    'permission'    => '{{model_name_small}}',
+];

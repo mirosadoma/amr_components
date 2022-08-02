@@ -1,0 +1,195 @@
+<?php
+
+namespace {{namespace}};
+
+use Amr\AmrComponents\Controller;
+use Illuminate\Http\Request;
+// Models
+use {{model}};
+// Requests
+use {{store_request}};
+use {{update_request}};
+
+class {{controlar_name}}Controller extends Controller
+{
+    public function index() {
+        if (!permissionCheck('{{route}}.view')) {
+            return abort(403);
+        }
+        $PageTitle = __('All {{view}}');
+        $Breadcrumb = [
+            [
+                'name'  =>  $PageTitle,
+                'route' =>  '{{route}}.index',
+            ],
+        ];
+        if (permissionCheck('{{route}}.create')) {
+            $Button = [
+                'title' => __('Add {{model_name}}'),
+                'route' =>  '{{route}}.create',
+                'icon'  => 'plus'
+            ];
+        }
+        $search  = {{model_name}}::FORM_SEARCH();
+        $lists = {{model_name}}::query();
+        if (request()->has('filter') && request('filter') != 0) {
+            if (request()->has('is_active') && !is_null(request('is_active'))) {
+                $lists->where('is_active', request('is_active'));
+            }
+            if (request()->has('created_at') && !empty(request('created_at'))) {
+                $lists->whereDate('created_at', request('created_at'));
+            }
+        }
+        $lists = $lists->orderBy('id', "DESC")->paginate();
+        return view('{{view}}_Dashboard::index',get_defined_vars());
+    }
+
+    public function create() {
+        if (!permissionCheck('{{route}}.create')) {
+            return abort(403);
+        }
+        $PageTitle = __('Add {{model_name}}');
+        $ValidaionPath = '{{store_request}}';
+        $Breadcrumb = [
+            [
+                'name'      =>  __('All {{view}}'),
+                'route'     =>  '{{route}}.index',
+            ],
+            [
+                'name'      =>  $PageTitle,
+                'route'     =>  '{{route}}.create',
+            ],
+        ];
+        $Button = [
+            'title'         => __('Back To {{view}}'),
+            'route'         =>  '{{route}}.index',
+            'icon'          => 'arrow-left'
+        ];
+        $info  = null;
+        $array = [
+            'title'         => $PageTitle,
+            'route'         => route('app.{{route}}.store'),
+            'submit'        =>'Save',
+            'type'          =>'create',
+            'back_route'    => route('app.{{route}}.index')
+        ];
+        $data  = {{model_name}}::FORM_INPUTS();
+        $data = array_merge($data,$array);
+        return view('{{view}}_Dashboard::action',get_defined_vars());
+    }
+
+    public function store({{store_request_name}} $request) {
+        if (!permissionCheck('{{route}}.create')) {
+            return abort(403);
+        }
+        $data = $request->all();
+        if (request()->has('image')) {
+            $data['image']  = imageUpload($request->image, '{{route}}');
+        }
+        $data['is_active'] = 1;
+        {{model_name}}::create($data);
+        return redirect()->route('app.{{route}}.index')->with('success', __('Data Saved Successfully'));
+    }
+
+    public function show({{model_name}} ${{lcfirst}}) {
+        if (!permissionCheck('{{route}}.view')) {
+            return abort(403);
+        }
+        $PageTitle = __('Show {{model_name}}');
+        $Breadcrumb = [
+            [
+                'name'  =>  __('All {{view}}'),
+                'route' =>  '{{route}}.index',
+            ],
+            [
+                'name'  =>  $PageTitle,
+                'route' =>  '{{route}}.show',
+            ],
+        ];
+        $Button = [
+            'title' => __('Back To {{view}}'),
+            'route' =>  '{{route}}.index',
+            'icon'  => 'arrow-left'
+        ];
+        return view('{{view}}_Dashboard::show',get_defined_vars());
+    }
+
+    public function edit(request $request,{{model_name}} ${{lcfirst}}) {
+        if (!permissionCheck('{{route}}.update')) {
+            return abort(403);
+        }
+        $PageTitle = __('Edit City');
+        $ValidaionPath = '{{update_request}}';
+        $Breadcrumb = [
+            [
+                'name'      =>  __('All {{model_name}}'),
+                'route'     =>  '{{route}}.index',
+            ],
+            [
+                'name'      =>  $PageTitle,
+                'route'     =>  '{{route}}.edit',
+            ],
+        ];
+        $Button = [
+            'title'         => __('Back To {{view}}'),
+            'route'         =>  '{{route}}.index',
+            'icon'          => 'arrow-left'
+        ];
+        $info  = ${{lcfirst}};
+        $array = [
+            'title'         => $PageTitle,
+            'route'         => route('app.{{route}}.update',${{lcfirst}}->id),
+            'method'        =>'PUT',
+            'submit'        =>'Update',
+            'type'          =>'update',
+            'back_route'    => route('app.{{route}}.index')
+        ];
+        $data  = {{model_name}}::FORM_INPUTS();
+        $data = array_merge($data,$array);
+        return view('{{view}}_Dashboard::action',get_defined_vars());
+    }
+
+    public function update({{update_request_name}} $request,{{model_name}} ${{lcfirst}}) {
+        if (!permissionCheck('{{route}}.update')) {
+            return abort(403);
+        }
+        $data = $request->all();
+        if (request()->has('image')) {
+            $data['image']      = imageUpload($request->image, '{{route}}', [], false, true, ${{lcfirst}}->image);
+        }else{
+            unset($data['image']);
+        }
+        ${{lcfirst}}->update($data);
+        return redirect()->route('app.{{route}}.index')->with('success', __('Data Updated Successfully'));
+    }
+
+    public function destroy({{model_name}} ${{lcfirst}}) {
+        if (!permissionCheck('{{route}}.delete')) {
+            return abort(403);
+        }
+        ${{lcfirst}}->delete();
+        return redirect()->route('app.{{route}}.index')->with('success', __('Data Deleted Successfully'));
+    }
+
+    public function is_active(${{lcfirst}})
+    {
+        ${{lcfirst}} = {{model_name}}::find(${{lcfirst}});
+        if (${{lcfirst}}->is_active == 0) {
+            ${{lcfirst}}->update(['is_active' => 1]);
+        }else{
+            ${{lcfirst}}->update(['is_active' => 0]);
+        }
+        return redirect()->back()->with('success', __('Status Updated Successfully'));
+    }
+
+    public function remove_image(${{lcfirst}}) {
+        ${{lcfirst}} = {{model_name}}::find(${{lcfirst}});
+        DeleteImage(${{lcfirst}}->image);
+        ${{lcfirst}}->update([
+            'image' => null
+        ]);
+        return response()->json([
+            'message' => __('Image Deleted Successfully'),
+        ]);
+    }
+}

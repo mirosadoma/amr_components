@@ -1,0 +1,52 @@
+@extends('admin.layouts.master')
+@section('head_title'){{__('Show {{model_name_big}}')}}@endsection
+@section('content')
+@include('admin.layouts.inc.breadcrumb', ['array' => $Breadcrumb,'button' => $Button])
+@push('styles')
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
+@endpush
+<div class="content-body">
+    <!-- Advanced Search -->
+    <section id="advanced-search-datatable">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title"> @lang("Show {{model_name_big}}") </h5>
+                    </div>
+                    <div class="card-body table-responsive">
+                        <fieldset>
+                            <table class="table datatable-basic">
+                                <thead>
+                                    <tr>
+                                        <th {!! \table_width_head(10) !!}>@lang("ID")</th>
+                                        <td>{{${{model_obj}}->id}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th {!! \table_width_head(10) !!}>@lang("Title")</th>
+                                        <td>{{${{model_obj}}->title}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th {!! \table_width_head(10) !!}>@lang("Message Timing")</th>
+                                        <td>{{ isset(${{model_obj}}->created_at) ? ${{model_obj}}->created_at->diffForHumans() :__('Not Found') }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th {!! \table_width_head(10) !!}>@lang("Message Date")</th>
+                                        <td>{{ isset(${{model_obj}}->created_at) ? ${{model_obj}}->created_at->format('Y-m-d') : __('Not Found') }}</td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                            <br/>
+                            <div class="text-right">
+                                {!! BackButton('Back', route('app.contactus.index')) !!}
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+@endsection

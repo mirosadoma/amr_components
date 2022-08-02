@@ -1,0 +1,10 @@
+<?php
+
+return [
+    'title'         => __('{{component_name}}'),
+    'icon'          => 'fa fa-bar-chart-o',
+    'color'         => 'blue',
+    'url'           => route('app.{{model_name_small}}.index'),
+    'permission'    => '{{model_name_small}}',
+    'count'         => \App\Components\{{component_name}}\Models\{{model_name_big}}::count()
+];

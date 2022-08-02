@@ -1,0 +1,39 @@
+<?php
+
+namespace {{namespace}};
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class {{file_name}} extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     *
+     * @return bool
+     */
+    public function authorize()
+    {
+        return true;
+    }
+
+    public function attributes()
+    {
+        return [
+            'title'                 => __('Title'),
+            'image'                 => __('{{model_name_big}} Image'),
+        ];
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array
+     */
+    public function rules()
+    {
+        return [
+            'title'                 => 'required|string|between:2,100',
+            'image'                 => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
+        ];
+    }
+}

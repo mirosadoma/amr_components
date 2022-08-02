@@ -1,0 +1,20 @@
+<?php
+
+return [
+    'title'         => '{{component_name}}',
+    'icon'          => 'grid',
+    'order'         => 7,
+    'permission'    => '{{model_name_small}}',
+    'items'         => [
+        [
+            'title'         => 'All {{component_name}}',
+            'url'           => route('app.{{model_name_small}}.index'),
+            'permission'    => 'view'
+        ],
+        [
+            'title'         => 'Locales',
+            'url'           => route('app.{{model_name_small}}.locales.index'),
+            'permission'    => 'locales'
+        ]
+    ]
+];

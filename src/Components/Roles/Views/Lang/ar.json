@@ -1,0 +1,10 @@
+{
+    "Roles": "الأدوار",
+    "All Roles": "جميع الأدوار",
+    "Add New Role": "اضافة دور جديد",
+    "Role Name": "إسم الدور",
+    "Add Role": "إضافة دور",
+    "Edit Role": "تعديل الدور",
+    "Back To Roles": "العودة للأدوار",
+    "This role cannot be deleted because it is associated with a user": "لايمكن حذف هذا الدور بسبب ارتباطها بمستخدم"
+}

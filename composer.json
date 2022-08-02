@@ -1,0 +1,51 @@
+{
+    "name": "amr/amr_components",
+    "description": "Amr Components Method",
+    "keywords":["Laravel","AmrComponents"],
+    "license": "MIT",
+    "version":"1.0",
+    "authors": [
+        {
+            "name": "Eslam Saloka && Amr Mohamed",
+            "email": "amrmohamed171996@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.0.0",
+        "laravel/telescope": "^4.4",
+        "mcamara/laravel-localization": "^1.6",
+        "mews/captcha": "^3.2",
+        "milon/barcode": "^8.0",
+        "proengsoft/laravel-jsvalidation": "^4.4",
+        "revolution/laravel-pagination-uikit": "^1.0",
+        "spatie/laravel-permission": "^4.0",
+        "artesaos/seotools": "^0.20.2",
+        "astrotomic/laravel-translatable": "^11.9",
+        "fideloper/proxy": "^4.4",
+        "intervention/image": "^2.5",
+        "intervention/imagecache": "^2.5",
+        "kartik-v/yii2-widget-fileinput": "dev-master",
+        "symfony/finder": "^5.4"
+    },
+    "require-dev": {
+        "barryvdh/laravel-debugbar": "^3.5"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Amr\\AmrComponents\\AmrServiceProvider"
+            ]
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Amr\\AmrComponents\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Amr\\AmrComponents\\": "src/"
+        }
+    },
+    "minimum-stability": "dev"
+}

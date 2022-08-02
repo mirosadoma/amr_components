@@ -1,0 +1,130 @@
+<?php
+if (!function_exists('_fixDirSeparator')) {
+    function _fixDirSeparator($path) {
+        return str_replace(['\\', '/'], DIRECTORY_SEPARATOR, $path);
+    }
+}
+if (!function_exists('Assets')) {
+    function AssetsAdmin($path,$type='css') {
+        return ($type == 'css')?'<link href="'.url('assets/admin/assets/css/'.$path).'" rel="stylesheet" type="text/css">':'<script type="text/javascript" src="'.url('assets/admin/assets/js/'.$path).'"></script>';
+    }
+}
+
+if (!function_exists('AdminMenu')) {
+    function AdminMenu() {
+        $dashboardMenus = '';
+
+        $glob = glob(__DIR__ . '/**/Resources/menu/*.php');
+        $f = collect($glob)->groupBy(function($el) {
+            return pathinfo($el)['filename'];
+        });
+        $f->transform(function ($item) {
+            $data = [];
+            foreach ($item as $value) {
+                $data[] = require $value;
+            }
+            return collect(array_filter($data));
+        });
+        foreach ($f->get('menu') as $main_item) {
+            $icon = isset($main_item['icon']) ? $main_item['icon'] : '';
+            $title = isset($main_item['title']) ? __($main_item['title']) : '';
+            $hasItems = isset($main_item['items']) && !empty($main_item['items']);
+            $c = '';
+            if($hasItems) {
+                $c = 'has-ul';
+            }
+            $dashboardMenus .= '<li><a href="#" class="legitRipple '.$c.'"><i class="'.$icon .'"></i> <span>'.$title.'</span></a>';
+            if($hasItems) {
+                $dashboardMenus .= AdminMenuTree($main_item['items']);
+            }
+            $dashboardMenus .= '</li>';
+        }
+        return  $dashboardMenus;
+    }
+}
+
+if (!function_exists('AdminMenuTree')) {
+    function AdminMenuTree($array,$hasul = '') {
+        $menu = '<ul class="'.$hasul.'">';
+        foreach($array as $val) {
+            if(array_key_exists('items',$val)) {
+                $menu .= '<li><a href="'.route($val['url']).'" class="has-ul legitRipple">'.$val['title'].'</a>';
+                $menu .= AdminMenuTree($val['items'],'hidden-ul');
+                $menu .= '</li>';
+            } else {
+                $menu .= '<li><a href="'.route($val['url']).'" class="legitRipple">'.$val['title'].'</a></li>';
+            }
+        }
+        $menu .= '</ul>';
+        return $menu;
+    }
+}
+
+if (!function_exists('delete_list_from_table')) {
+    function delete_list_from_table($route,$id) {
+        echo  '<form action="'.route($route,$id).'" method="post">
+        <input name="_method" type="hidden" value="delete">
+        <input type="hidden" name="_token" id="csrf-token" value="'.Session::token().'" />
+        <a href="" class="delete-record"><i class="icon-trash"></i></a>
+        </form>';
+    }
+}
+
+
+if (!function_exists('from_input')) {
+    function from_input($name,$lang,$type='text',$value='') {
+        echo  '<div class="form-group">
+        <label class="control-label col-lg-2">'.__($lang).'</label>
+        <div class="col-md-10">
+                <input type="'.$type.'" class="form-control" name="'.$name.'" value="'.$value.'" />
+        </div>
+    </div>';
+    }
+}
+
+if (!function_exists('from_input_textarea')) {
+    function from_input_textarea($name,$lang,$value='') {
+        echo  '<div class="form-group">
+        <label class="control-label col-lg-2">'.__($lang).'</label>
+        <div class="col-md-10">
+                <textarea class="form-control" name="'.$name.'" />'.$value.'</textarea>
+        </div>
+    </div>';
+    }
+}
+
+if (!function_exists('from_image')) {
+    function from_image($name,$value='') {
+        $value = ($value == '')?'':url($value);
+        echo  '<div class="form-group form-group-material">
+        <img src="'.$value.'" style=" width: 50px; height: 50px;margin-bottom: 10px;"/>
+        <input type="file" name="'.$name.'" class="file-styled">
+    </div>';
+    }
+}
+
+
+if (!function_exists('file_upload')) {
+    function file_upload($file, $wh = [], $base64 = false, $watermark = false) {
+        $destinationPath = "uploads";
+        if (! is_dir($destinationPath)) {
+            mkdir($destinationPath, 0755, true);
+        }
+        if ($base64 == true) {
+            $file = Image::make(base64_decode($file));
+        } else {
+            $file = Image::make($file->getRealPath());
+        }
+        $input = time() . rand(10000, 99999) . '.jpg';
+        if(!empty($wh)) {
+            $file->resize($wh['w'], $wh['h']);
+        } else {
+            $file->resize(800, 500);
+        }
+        if ($watermark == true) {
+            $file->insert('/test.png');
+        }
+        $file->save($destinationPath . '/' . $input);
+        return $destinationPath . '/' . $input;
+    }
+}

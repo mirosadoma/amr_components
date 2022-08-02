@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Components;
+
+use \App\Http\Controllers\Controller as BaseController;
+use Validator;
+
+class Controller extends BaseController {
+
+    public function __construct() {
+        if (request()->is('*app*')) {
+            $this->setViewPath();
+        } else {
+            $this->setViewPath();
+        }
+    }
+
+
+    private function setViewPath() {
+        $_this = new \ReflectionClass($this);
+        $filename = $_this->getFilename();
+        $basePath = str_replace(substr($filename, strpos($filename, 'Controller')), '', $filename);
+        view()->addNamespace('this', _fixDirSeparator($basePath . 'View'));
+    }
+
+}

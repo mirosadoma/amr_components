@@ -1,0 +1,11 @@
+<?php
+
+return [
+    '{{model_name_small}}'  => [
+        'view',
+        'create',
+        'update',
+        'delete',
+        'locales',
+    ]
+];
