@@ -47,7 +47,7 @@
             <div class="content">
                 <div class="title">Be right back.</div>
                 <div class="text-right">
-                    <a class="btn sbold green" href="{{ route('app.dashboard') }}">@lang('Back To Main Page')
+                    <a class="btn sbold green" href="{{ url('/app') }}">@lang('Back To Main Page')
                         <i class="fa fa-arrow-left"></i>
                     </a>
                 </div>

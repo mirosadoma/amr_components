@@ -32,9 +32,17 @@ class AmrServiceProvider extends ServiceProvider {
 
     protected $Namespace = 'App\Components';
     protected $API_version = 'api/v1/';
-    protected $middleware = [
+    protected $site_middleware = [
         'web',
         'maintenance',
+        'localize' => \Mcamara\LaravelLocalization\Middleware\LaravelLocalizationRoutes::class,
+        'localizationRedirect' => \Mcamara\LaravelLocalization\Middleware\LaravelLocalizationRedirectFilter::class,
+        'localeSessionRedirect' => \Mcamara\LaravelLocalization\Middleware\LocaleSessionRedirect::class,
+        'localeViewPath' => \Mcamara\LaravelLocalization\Middleware\LaravelLocalizationViewPath::class
+    ];
+    protected $admin_middleware = [
+        'web',
+        'admin',
         'localize' => \Mcamara\LaravelLocalization\Middleware\LaravelLocalizationRoutes::class,
         'localizationRedirect' => \Mcamara\LaravelLocalization\Middleware\LaravelLocalizationRedirectFilter::class,
         'localeSessionRedirect' => \Mcamara\LaravelLocalization\Middleware\LocaleSessionRedirect::class,
@@ -50,7 +58,7 @@ class AmrServiceProvider extends ServiceProvider {
     }
 
     public function boot() {
-        
+
         Schema::defaultStringLength(191);
         date_default_timezone_set('Asia/Riyadh');
         Paginator::defaultView('pagination::pagination');
@@ -193,10 +201,7 @@ class AmrServiceProvider extends ServiceProvider {
         if (request()->is('*app*') || request()->is('api*')) {
             return;
         }
-        $site = Route::middleware($this->middleware)->prefix(LaravelLocalization::setLocale().'/');
-        $site->middleware(['user_verfy'])->group(function () {
-            Route::get('/', [SiteMainController::class, 'index'])->name('home');// Done
-        });
+        $site = Route::middleware($this->site_middleware)->prefix(LaravelLocalization::setLocale().'/');
         $site->group(function () {
             Route::get('login', [SiteAuthController::class, 'loginPage'])->name('site.login');// Done
             Route::post('login', [SiteAuthController::class, 'loginAuth'])->name('site.loginAuth');// Done
@@ -211,6 +216,9 @@ class AmrServiceProvider extends ServiceProvider {
             Route::post('reset_password', [SiteAuthController::class, 'reset_passwordAuth'])->name('site.reset_passwordAuth');// Done
             Route::get('logout', [SiteAuthController::class, 'logout'])->name('site.logout');// Done
         });
+        $site->middleware(['maintenance','user_verfy'])->prefix(LaravelLocalization::setLocale().'/')->group(function () {
+            Route::get('/', [SiteMainController::class, 'index'])->name('home');// Done
+        });
         return $site;
     }
 
@@ -218,15 +226,14 @@ class AmrServiceProvider extends ServiceProvider {
         if (!request()->is('*app*')) {
             return;
         }
-        $dashboard = Route::middleware('web')->prefix(LaravelLocalization::setLocale().'/');
+        $dashboard = Route::prefix(LaravelLocalization::setLocale().'/');
         $dashboard->group(function () {
             Route::get('/', [SiteMainController::class, 'index'])->name('home');// Done
             Route::get('/app/login', [DashboardAuthController::class, 'loginPage'])->name('login');// Done
             Route::post('/app/login', [DashboardAuthController::class, 'loginAuth'])->name('loginAuth');// Done
             Route::post('/app/logout', [DashboardAuthController::class, 'logout'])->name('logout');// Done
-            Route::get('/maintenance', [DashboardMainController::class, 'maintenance'])->name('maintenance');// Done
         });
-        $dashboard->middleware(['web','admin'])->prefix(LaravelLocalization::setLocale().'/app')->name('app.')->group(function () {
+        $dashboard->middleware($this->admin_middleware)->prefix(LaravelLocalization::setLocale().'/app')->name('app.')->group(function () {
             Route::get('/', [DashboardMainController::class, 'index'])->name('dashboard');// Done
             Route::post('/fast_trans', [DashboardMainController::class, 'fast_trans'])->name('fast_trans');// Done
             // Route::get('/get_year/{year}', [DashboardMainController::class, 'get_year'])->name('get_year');// Done
@@ -236,9 +243,10 @@ class AmrServiceProvider extends ServiceProvider {
     }
 
     public function loadWebRoutesSite() {
-        if (request()->is('*app*') || request()->is('api*')) {
+        if (request()->is('*app*') || request()->is('*api*')) {
             return;
         }
+        Route::get('/maintenance', [DashboardMainController::class, 'maintenance'])->name('maintenance');// Done
         $site = $this->authFrontRoute();
         $site->middleware(['user_verfy'])->group(function () use($site) {
             foreach (glob(app_path() . '/Components/**/Route/web.php') as $file) {
@@ -252,10 +260,10 @@ class AmrServiceProvider extends ServiceProvider {
         if (!request()->is('*app*')) {
             return;
         }
+        Route::get('/maintenance', [DashboardMainController::class, 'maintenance'])->name('maintenance');// Done
         $dashboard = $this->authDashboardRoute();
         foreach (glob(app_path() . '/Components/**/Route/admin.php') as $file) {
             $dashboard->group($file);
-            // include($file);
         }
         return $dashboard;
     }
