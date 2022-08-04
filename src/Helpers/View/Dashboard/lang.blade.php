@@ -1,4 +1,4 @@
-<div class="card-body table-responsive">
+<div class="form-body">
     <fieldset>
         @foreach(app_languages() as $key=>$one)
             <div class="tab-pane {{ $key == app()->getLocale() ? 'active' : '' }}" id="tab-{{$key}}" role="tabpanel">

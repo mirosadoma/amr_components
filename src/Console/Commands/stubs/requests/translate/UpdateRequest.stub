@@ -18,18 +18,18 @@ class {{file_name}} extends FormRequest
 
     public function attributes()
     {
-        $langs = [
-            'title'                 => 'Title',
-        ];
-        $return = [
-            'image'                 => __('{{model_name_big}} Image'),
-        ];
+        $returns = [];
+        $langs = {{requests_attributes_inputs_trans}};
+        $return = {{requests_attributes_inputs}};
         foreach(app_languages() as $key=>$value) {
             foreach($langs as $K=>$V) {
-                $return[$key.".".$K] = __($value['name']. " " .$V);
+                $returns[$key.".".$K] = __($value['name']. " " .$V);
             }
         }
-        return $return;
+        foreach($return as $key2=>$value2) {
+            $returns[$key2] = __($value2);
+        }
+        return $returns;
     }
 
     /**
@@ -39,15 +39,8 @@ class {{file_name}} extends FormRequest
      */
     public function rules()
     {
-        $rules = [
-            'image'             => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
-        ];
-        $lang_rules = [];
-        foreach(app_languages() as $key => $value){
-            $lang_rules[$key] = [
-                $key.".title"   => "required|string|between:2,100",
-            ];
-        }
+        $rules = {{requests_validation_inputs}};
+        $lang_rules = {{requests_validation_inputs_trans}};
         extract($lang_rules, EXTR_PREFIX_SAME, "wddx");
         $rules = array_merge($rules, $ar, $en);
         return $rules;

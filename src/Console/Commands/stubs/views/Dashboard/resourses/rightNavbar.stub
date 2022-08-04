@@ -12,6 +12,11 @@ return [
             'permission'    => 'view'
         ],
         [
+            'title'         => 'Add New {{model_name_big}}',
+            'url'           => route('app.{{model_name_small}}.create'),
+            'permission'    => 'create'
+        ],
+        [
             'title'         => 'Locales',
             'url'           => route('app.{{model_name_small}}.locales.index'),
             'permission'    => 'locales'

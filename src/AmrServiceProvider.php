@@ -50,11 +50,11 @@ class AmrServiceProvider extends ServiceProvider {
     }
 
     public function boot() {
+        
         Schema::defaultStringLength(191);
         date_default_timezone_set('Asia/Riyadh');
         Paginator::defaultView('pagination::pagination');
         Paginator::defaultSimpleView('pagination::pagination');
-
 
         $this->loadHelpers();
         $this->_loadGuards_();

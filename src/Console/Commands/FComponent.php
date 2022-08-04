@@ -32,9 +32,21 @@ class FComponent extends Command
 
     protected $translate = false;
 
+    protected $is_editor = false;
+
+    protected $is_file = false;
+
     protected $inputs_count = 0;
 
     protected $inputs = [];
+
+    protected $model_inputs = [];
+
+    protected $requests_validation_inputs = [];
+
+    protected $requests_attributes_inputs = [];
+
+    protected $model_translatedAttributes = "";
 
     protected $stubMap = [
         'Controllers' => [
@@ -104,8 +116,21 @@ class FComponent extends Command
         if($this->argument('name') == 'default') {
             $this->info('Component Name Missing');
         } else {
+            if (!preg_match('~^\p{Lu}~u', $this->argument('name'))) {
+                $this->info("------------------");
+                $this->info("Note :- Your Component Should Has First Letter UberCase");
+                $this->info("------------------");
+                die;
+            }
+
+            if (!str_ends_with($this->argument('name'),'s')) {
+                $this->info("------------------");
+                $this->info("Note :- Your Component Should Ends With 's'");
+                $this->info("------------------");
+                die;
+            }
             $ask = $this->ask('What Is The Count Of Your Inputs');
-            if(lcfirst($ask) == null || !is_numeric($ask)) {
+            if(strtolower($ask) == null || !is_numeric($ask)) {
                 $this->info("Not Choosen");
                 $this->info("------------------");
                 die;
@@ -113,30 +138,164 @@ class FComponent extends Command
             $this->inputs_count = $ask;
             for ($i=1; $i <= $this->inputs_count; $i++) {
                 $ask1 = $this->ask('Please Write The Name Of Input ' . $i . ' :-');
-                if(lcfirst($ask1) == null) {
+                if(strtolower($ask1) == null) {
                     $this->info("Not Choosen");
                     $this->info("------------------");
                     die;
                 }
-                $types = ['string' , 'integer' , 'bool' , 'text' , 'bigInteger' , 'bigText'];
-                $ask2 = $this->ask('Please Write The Type Of Input ' . $i . ' [ string , integer , bool , text , bigInteger , bigText ] :-');
-                if(lcfirst($ask2) == null || !in_array(lcfirst($ask2), $types) ){
+                $types = ['string', 'integer', 'tinyInteger', 'bigInteger', 'float', 'double', 'decimal', 'text', 'longText', 'date', 'dateTime', 'time', 'timestamp', 'json'];
+                $ask2 = $this->ask('Please Write The Type Of Input (' . strtolower($ask1) . ') [ string, integer, tinyInteger, bigInteger, float, double, decimal, text, longText, date, dateTime, time, timestamp, json ] :-');
+                if($ask2 == null || !in_array($ask2, $types) ){
                     $this->info("Type Not Found Please Choose From Up");
                     $this->info("------------------");
                     die;
                 }
-                $ask3 = $this->ask('Please Write If The Input ' . $i . ' Is Translation Or Not [ y , n ] :-');
-                if(lcfirst($ask3) == null || !in_array(lcfirst($ask3), ['y','n']) ){
-                    $this->info("Answer Not Found Please Choose From Up");
-                    $this->info("------------------");
-                    die;
+                if (!in_array($ask2, ['integer', 'tinyInteger', 'bigInteger', 'float', 'double', 'decimal', 'date', 'dateTime', 'time', 'timestamp'])) {
+                    $ask3 = $this->ask('Please Write If The Input (' . strtolower($ask1) . ') Is Translation Or Not [ y , n ] :-');
+                    if(strtolower($ask3) == null || !in_array(strtolower($ask3), ['y','n']) ){
+                        $this->info("Answer Not Found Please Choose From Up");
+                        $this->info("------------------");
+                        die;
+                    }
+                }else{
+                    $ask3 = "n";
+                }
+                if ($ask2 == "text" || $ask2 == "longText") {
+                    $ask_editor = $this->ask('Do You Want Editor For This Input (' . strtolower($ask1) . ') [ y, n ] :-');
+                    if(strtolower($ask_editor) == null || !in_array(strtolower($ask_editor), ['y','n']) ){
+                        $this->info("Answer Not Found Please Choose From Up");
+                        $this->info("------------------");
+                        die;
+                    }
+                    if($ask_editor == "y"){
+                        $this->model_inputs['editor'] = true;
+                        if(strtolower($ask3) == "y"){
+
+                $types = ['string', 'text', 'longText', 'date', 'dateTime', 'time', 'timestamp', 'json'];
+
+                            $type = "";
+                            if (in_array(strtolower($ask2), ['integer', 'tinyInteger', 'bigInteger', 'float', 'double', 'decimal'])) {
+                                $type = "number";
+                            }elseif (in_array(strtolower($ask2), ['string', 'text', 'longText'])) {
+                                $type = "textarea";
+                            }else{
+                                $type = strtolower($ask2);
+                            }
+                            $this->model_inputs['lang']['inputs'][] = [
+                                'label' => ucfirst($ask1),
+                                'name'  => strtolower($ask1),
+                                'type'  => $type,
+                                'value' => '',
+                                'editor' => true,
+                            ];
+                            $this->is_editor = true;
+                        }else{
+                            $this->model_inputs['inputs'][] = [
+                                'label' => ucfirst($ask1),
+                                'name'  => strtolower($ask1),
+                                'type'  => (in_array(strtolower($ask2), ['integer', 'tinyInteger', 'bigInteger', 'float', 'double', 'decimal'])) ? "number" : strtolower($ask2),
+                                'value' => '',
+                                'editor' => true,
+                            ];
+                        }
+                    }
+                }
+                $ask_file_type = '';
+                if (strtolower($ask2) == "string") {
+                    $ask_file_upload = $this->ask('If This Input (' . strtolower($ask1) . ') Is File Upload ? [ y , n ] :-');
+                    if(strtolower($ask_file_upload) == null || !in_array(strtolower($ask_file_upload), ['y','n']) ){
+                        $this->info("Answer Not Found Please Choose From Up");
+                        $this->info("------------------");
+                        die;
+                    }
+                    if($ask_file_upload == "y"){
+                        $ask_file_type = $this->ask('If This File Upload (' . strtolower($ask1) . ') Is :-  [ image , file ] :-');
+                        if(strtolower($ask_file_type) == null || !in_array(strtolower($ask_file_type), ['image','file']) ){
+                            $this->info("Answer Not Found Please Choose From Up");
+                            $this->info("------------------");
+                            die;
+                        }
+                        $ask_file_multiple = $this->ask('If This File Upload (' . strtolower($ask1) . ') Is Multiple :-  [ y , n ] :-');
+                        if(strtolower($ask_file_multiple) == null || !in_array(strtolower($ask_file_multiple), ['y','n']) ){
+                            $this->info("Answer Not Found Please Choose From Up");
+                            $this->info("------------------");
+                            die;
+                        }
+                        $this->model_inputs['files'][] = [
+                            'label'         => ucfirst($ask1),
+                            'name'          => strtolower($ask1),
+                            'class'         => strtolower($ask1).'_'.strtolower($ask_file_type), // to call file input by class
+                            'type'          => 'file', // image/video/file
+                            'path'          => strtolower($ask_file_type).'_path', // to call file path
+                            'delete_url'    => strtolower($this->argument('name')).'/remove_'.strtolower($ask_file_type).'/', // to delete file
+                            'multiple'      => $ask_file_multiple == "y" ? true : false, // file/files
+                        ];
+                        $this->is_file = true;
+                    }
                 }
 
                 $this->inputs[] = [
-                    'name'=>lcfirst($ask1),
-                    'type'=>lcfirst($ask2),
-                    'trans'=>lcfirst($ask3),
+                    'name'=>strtolower($ask1),
+                    'type'=>strtolower($ask2),
+                    'trans'=>strtolower($ask3),
                 ];
+
+                if ($this->is_editor == false && $this->is_file == false) {
+                    $type = "";
+                    if (in_array(strtolower($ask2), ['integer', 'tinyInteger', 'bigInteger', 'float', 'double', 'decimal'])) {
+                        $type = "number";
+                    }elseif (in_array(strtolower($ask2), ['string', 'text', 'longText'])) {
+                        $type = "text";
+                    }else{
+                        $type = strtolower($ask2);
+                    }
+                    if(strtolower($ask3) == "y"){
+                        $this->model_inputs['lang']['inputs'][] = [
+                            'label' => ucfirst($ask1),
+                            'name'  => strtolower($ask1),
+                            'type'  => $type,
+                            'value' => '',
+                        ];
+                    }else{
+                        $this->model_inputs['inputs'][] = [
+                            'label' => ucfirst($ask1),
+                            'name'  => strtolower($ask1),
+                            'type'  => $type,
+                            'value' => '',
+                        ];
+                    }
+                }
+                $this->is_editor    = false;
+                $this->is_file      = false;
+
+
+                $types = ['integer', 'tinyInteger', 'bigInteger', 'float', 'double', 'decimal', 'date', 'dateTime', 'time', 'timestamp', 'json'];
+                // Requests Validation Inputs
+                if (in_array($ask2, ['string', 'text', 'longText', 'date', 'dateTime', 'time', 'timestamp'])) {
+                    if (strtolower($ask2) == "string" && strtolower($ask_file_type) == 'image') {
+                        $this->requests_validation_inputs['normal'][strtolower($ask1)] = 'nullable|image|mimes:jpeg,png,jpg,gif,svg';
+                    }elseif (strtolower($ask2) == "string" && strtolower($ask_file_type) == 'file') {
+                        $this->requests_validation_inputs['normal'][strtolower($ask1)] = 'nullable|mimes:pdf';
+                    }else{
+                        if (strtolower($ask3) == "y") {
+                            foreach(app_languages() as $key => $value){
+                                $this->requests_validation_inputs['trans'][$key][$key.".".strtolower($ask1)] = "required|string|between:2,100";
+                            }
+                        }else{
+                            $this->requests_validation_inputs['normal'][strtolower($ask1)] = 'required|string|between:2,100';
+                        }
+                    }
+                }elseif(in_array($ask2, ['integer', 'tinyInteger', 'bigInteger', 'float', 'double', 'decimal'])){
+                    $this->requests_validation_inputs['normal'][strtolower($ask1)] = 'required|min:6|max:255';
+                }else{
+                    $this->requests_validation_inputs['normal'][strtolower($ask1)] = 'required';
+                }
+                if (strtolower($ask3) == "y") {
+                    $this->requests_attributes_inputs['trans'][strtolower($ask1)] = __(ucfirst($ask1));
+                }else{
+                    $this->requests_attributes_inputs['normal'][strtolower($ask1)] = __(rtrim($this->argument('name'),'s') . ' ' . ucfirst($ask1));
+                }
+                $this->model_translatedAttributes .= strtolower($ask2).",";
             }
             $this->info('------------------');
             $this->createComponent();
@@ -400,13 +559,13 @@ class FComponent extends Command
             $table_id    = rtrim($table_name,'s');
             foreach($this->inputs as $input){
                 if ($input['trans'] == "y") {
-                    if (in_array($input['type'], ['string' ,'text' ,'bigText'])) {
+                    if (in_array($input['type'], ['string', 'text', 'longText', 'date', 'dateTime', 'time', 'timestamp', 'json'])) {
                         $inputs_trans .= '$table->'.$input['type'].'(\''.$input['name'].'\')->nullable();'."\r\n";
                     }else{
                         $inputs_trans .= '$table->'.$input['type'].'(\''.$input['name'].'\')->default(0);'."\r\n";
                     }
                 }else{
-                    if (in_array($input['type'], ['string' ,'text' ,'bigText'])) {
+                    if (in_array($input['type'], ['string', 'text', 'longText', 'date', 'dateTime', 'time', 'timestamp', 'json'])) {
                         $inputs .= '$table->'.$input['type'].'(\''.$input['name'].'\')->nullable();'."\r\n";
                     }else{
                         $inputs .= '$table->'.$input['type'].'(\''.$input['name'].'\')->default(0);'."\r\n";
@@ -469,17 +628,37 @@ class FComponent extends Command
         $model_name_big         = rtrim($this->argument('name'),'s');
         if($translate == 0) {
             return str_replace(
-                ['{{namespace}}','{{component_name}}','{{component_id}}','{{model_name_small}}','{{model_name_big}}'],
-                [$namespace,$component_name,$component_id,$model_name_small,$model_name_big],
+                ['{{namespace}}','{{component_name}}','{{component_id}}','{{model_name_small}}','{{model_name_big}}','{{model_inputs}}'],
+                [$namespace,$component_name,$component_id,$model_name_small,$model_name_big,$this->varexport($this->model_inputs,true)],
                 file_get_contents(__DIR__.'/stubs/models/normal/model.stub')
             );
         } else {
-            return str_replace(
-                ['{{namespace}}','{{component_name}}','{{component_id}}','{{model_name_small}}','{{model_name_big}}'],
-                [$namespace,$component_name,$component_id,$model_name_small,$model_name_big],
-                file_get_contents(__DIR__.'/stubs/models/translate/'.$file.'.stub')
-            );
+            if ($file == "model") {
+                return str_replace(
+                    ['{{namespace}}','{{component_name}}','{{component_id}}','{{model_name_small}}','{{model_name_big}}','{{model_inputs}}','{{model_translatedAttributes}}'],
+                    [$namespace,$component_name,$component_id,$model_name_small,$model_name_big,$this->varexport($this->model_inputs,true),$this->model_translatedAttributes],
+                    file_get_contents(__DIR__.'/stubs/models/translate/'.$file.'.stub')
+                );
+            }else{
+                return str_replace(
+                    ['{{namespace}}','{{component_name}}','{{component_id}}','{{model_name_small}}','{{model_name_big}}','{{model_translatedAttributes}}'],
+                    [$namespace,$component_name,$component_id,$model_name_small,$model_name_big,$this->model_translatedAttributes],
+                    file_get_contents(__DIR__.'/stubs/models/translate/'.$file.'.stub')
+                );
+            }
         }
+    }
+
+    protected function varexport($expression, $return=FALSE) {
+        $export = var_export($expression, TRUE);
+        $patterns = [
+            "/array \(/" => '[',
+            "/^([ ]*)\)(,?)$/m" => '$1]$2',
+            "/=>[ ]?\n[ ]+\[/" => '=> [',
+            "/([ ]*)(\'[^\']+\') => ([\[\'])/" => '$1$2 => $3',
+        ];
+        $export = preg_replace(array_keys($patterns), array_values($patterns), $export);
+        if ((bool)$return) return $export; else echo $export;
     }
 
     protected function requestsFunction($value) {
@@ -503,7 +682,7 @@ class FComponent extends Command
                    );
                 } else {
                    file_put_contents(
-                       $path.'/'.$val['dashboard'].'.php',
+                       $path.'/'.$val['dashboard'],
                        $this->compileRequestsStub($dir,$file_name,1,'dashboard')
                    );
                }
@@ -546,14 +725,14 @@ class FComponent extends Command
         $model_name_big         = rtrim($component_name,'s');
         if($translate == 0) {
             return str_replace(
-                ['{{namespace}}','{{component_name}}','{{component_id}}','{{model_name_small}}','{{model_name_big}}','{{file_name}}'],
-                [$namespace,$component_name,$component_id,$model_name_small,$model_name_big,$file_name],
+                ['{{namespace}}','{{component_name}}','{{component_id}}','{{model_name_small}}','{{model_name_big}}','{{file_name}}', '{{requests_validation_inputs}}', '{{requests_attributes_inputs}}'],
+                [$namespace,$component_name,$component_id,$model_name_small,$model_name_big,$file_name, $this->varexport($this->requests_validation_inputs['normal'],true), $this->varexport($this->requests_attributes_inputs['normal'],true)],
                 file_get_contents(__DIR__.'/stubs/requests/normal/'.$file_name.'.stub')
             );
         } else {
             return str_replace(
-                ['{{namespace}}','{{component_name}}','{{component_id}}','{{model_name_small}}','{{model_name_big}}','{{file_name}}'],
-                [$namespace,$component_name,$component_id,$model_name_small,$model_name_big,$file_name],
+                ['{{namespace}}','{{component_name}}','{{component_id}}','{{model_name_small}}','{{model_name_big}}','{{file_name}}', '{{requests_validation_inputs}}', '{{requests_attributes_inputs}}', '{{requests_validation_inputs_trans}}', '{{requests_attributes_inputs_trans}}'],
+                [$namespace,$component_name,$component_id,$model_name_small,$model_name_big,$file_name, $this->varexport($this->requests_validation_inputs['normal'],true), $this->varexport($this->requests_attributes_inputs['normal'],true), $this->varexport($this->requests_validation_inputs['trans'],true), $this->varexport($this->requests_attributes_inputs['trans'],true)],
                 file_get_contents(__DIR__.'/stubs/requests/translate/'.$file_name.'.stub')
             );
         }

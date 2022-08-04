@@ -11,27 +11,7 @@ class {{model_name_big}} extends Model {
     protected $guarded = ['id'];
 
     public static function FORM_INPUTS(){
-        return [
-            'inputs' => [
-                [
-                    'label' => 'Title',
-                    'name'  => 'title',
-                    'type'  => 'text',
-                    'value' => '',
-                ],
-            ],
-            'files' => [
-                [
-                    'label'         => 'Image',
-                    'name'          => 'image',
-                    'class'         => '{{model_name_small}}_image', // to call file input by class
-                    'type'          => 'image', // image/video/file
-                    'path'          => 'image_path', // to call file path
-                    'delete_url'    => '{{model_name_small}}/remove_image/', // to delete file
-                    'multiple'      => false, // file/files
-                ],
-            ],
-        ];
+        return {{model_inputs}};
     }
 
     public static function FORM_SEARCH(){
@@ -55,6 +35,6 @@ class {{model_name_big}} extends Model {
 
     public function getImagePathAttribute()
     {
-        return $this->image ? url($this->image) : url('assets/site/images/two-confident-business-man-shaking-hands-during-meeting-office-success-dealing-greeting-partner-concept_1423-185.webp');
+        return $this->image ? url($this->image) : url('assets/logo.svg');
     }
 }

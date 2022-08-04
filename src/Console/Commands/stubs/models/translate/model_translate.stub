@@ -1,13 +1,13 @@
 <?php
 
-namespace {{namespace}}\Translation;
+namespace {{namespace}};
 
 use Illuminate\Database\Eloquent\Model;
 
 class {{model_name_big}} extends Model {
 
     protected $table = "{{model_name_small}}_translations";
-    protected $fillable = ['title'];
+    protected $fillable = [{{model_translatedAttributes}}];
     protected $guarded = ['{{component_id}}_id'];
     public $timestamps = false;
 }

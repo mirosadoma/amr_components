@@ -9,6 +9,7 @@
         <fieldset class="content-group">
             @if(isset($data['lang']))
                 @include('INPUTS::lang',['data'=>$data['lang']])
+                <hr>
             @endif
             <div class="form-body">
                 @if(isset($data['inputs']))
@@ -127,5 +128,5 @@
                 </script>
             @endforeach
         @endif
-    @endif 
+    @endif
 @endpush

@@ -18,10 +18,13 @@ class {{file_name}} extends FormRequest
 
     public function attributes()
     {
-        return [
-            'title'                 => __('Title'),
-            'image'                 => __('{{model_name_big}} Image'),
-        ];
+        $returns = [];
+        $return = {{requests_attributes_inputs}};
+
+        foreach($return as $key=>$value) {
+            $returns[$key] = __($value);
+        }
+        return $returns;
     }
 
     /**
@@ -31,9 +34,6 @@ class {{file_name}} extends FormRequest
      */
     public function rules()
     {
-        return [
-            'title'                 => 'required|string|between:2,100',
-            'image'                 => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
-        ];
+        return {{requests_validation_inputs}};
     }
 }
