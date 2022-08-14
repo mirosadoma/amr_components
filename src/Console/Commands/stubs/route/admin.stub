@@ -4,10 +4,9 @@ use Illuminate\Support\Facades\Route;
 
 // Locales Area
 Route::prefix('/{{name}}')->name('{{name}}.')->group(function () {
-    Route::resource('locales', LocalesController::class);
+    Route::resource('locales', {{directory}}\LocalesController::class);
 });
 
 // {{name}} Area
-Route::resource('{{name}}', {{directory}}::class);
-Route::get('{{name}}/remove_image/{{model_obj}}', [{{directory}}::class, 'remove_image'])->name('{{name}}.remove_image');
-Route::get('{{name}}/is_active/{{model_obj}}', [{{directory}}::class, 'is_active'])->name('{{name}}.is_active');
+Route::resource('{{name}}', {{directory}}\DashboardController::class);
+{{image_link_remove}}

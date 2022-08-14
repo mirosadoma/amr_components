@@ -15,7 +15,6 @@ class {{migrate}} extends Migration
     {
         Schema::create('{{table_name}}', function (Blueprint $table) {
             $table->id();
-            $table->tinyInteger('is_active')->default(0);
             {{inputs}}
             $table->timestamps();
         });

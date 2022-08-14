@@ -42,6 +42,8 @@ class FComponent extends Command
 
     protected $model_inputs = [];
 
+    protected $model_search = [];
+
     protected $requests_validation_inputs = [];
 
     protected $requests_attributes_inputs = [];
@@ -63,6 +65,7 @@ class FComponent extends Command
             'files'=>[
                 ['migration'=>'Database/migrations/Migration.php'],
                 ['seeder'=>'Database/seeders/Seeders.php'],
+                ['all_inputs'=>'Database/AllInputs.php'],
             ]
         ],
         'Models' => [
@@ -116,6 +119,8 @@ class FComponent extends Command
         if($this->argument('name') == 'default') {
             $this->info('Component Name Missing');
         } else {
+            // $this->getRelations();
+
             if (!preg_match('~^\p{Lu}~u', $this->argument('name'))) {
                 $this->info("------------------");
                 $this->info("Note :- Your Component Should Has First Letter UberCase");
@@ -129,39 +134,41 @@ class FComponent extends Command
                 $this->info("------------------");
                 die;
             }
+
             $ask = $this->ask('What Is The Count Of Your Inputs');
             if(strtolower($ask) == null || !is_numeric($ask)) {
                 $this->info("Not Choosen");
                 $this->info("------------------");
                 die;
             }
+
             $this->inputs_count = $ask;
             for ($i=1; $i <= $this->inputs_count; $i++) {
-                $ask1 = $this->ask('Please Write The Name Of Input ' . $i . ' :-');
-                if(strtolower($ask1) == null) {
+                $input_name = $this->ask('Please Write The Name Of Input ' . $i . ' :-');
+                if(strtolower($input_name) == null) {
                     $this->info("Not Choosen");
                     $this->info("------------------");
                     die;
                 }
-                $types = ['string', 'integer', 'tinyInteger', 'bigInteger', 'float', 'double', 'decimal', 'text', 'longText', 'date', 'dateTime', 'time', 'timestamp', 'json'];
-                $ask2 = $this->ask('Please Write The Type Of Input (' . strtolower($ask1) . ') [ string, integer, tinyInteger, bigInteger, float, double, decimal, text, longText, date, dateTime, time, timestamp, json ] :-');
-                if($ask2 == null || !in_array($ask2, $types) ){
+                $types = ['string', 'integer', 'tinyInteger', 'bigInteger', 'float', 'double', 'decimal', 'text', 'longText', 'date', 'dateTime', 'time', 'timestamp'];
+                $input_type = $this->ask('Please Write The Type Of Input (' . strtolower($input_name) . ') In Table [ string, integer, tinyInteger, bigInteger, float, double, decimal, text, longText, date, dateTime, time, timestamp ] :-');
+                if($input_type == null || !in_array($input_type, $types) ){
                     $this->info("Type Not Found Please Choose From Up");
                     $this->info("------------------");
                     die;
                 }
-                if (!in_array($ask2, ['integer', 'tinyInteger', 'bigInteger', 'float', 'double', 'decimal', 'date', 'dateTime', 'time', 'timestamp'])) {
-                    $ask3 = $this->ask('Please Write If The Input (' . strtolower($ask1) . ') Is Translation Or Not [ y , n ] :-');
-                    if(strtolower($ask3) == null || !in_array(strtolower($ask3), ['y','n']) ){
+                if (!in_array($input_type, ['integer', 'tinyInteger', 'bigInteger', 'float', 'double', 'decimal', 'date', 'dateTime', 'time', 'timestamp'])) {
+                    $is_trans = $this->ask('Please Write If The Input (' . strtolower($input_name) . ') Is Translation Or Not [ y , n ] :-');
+                    if(strtolower($is_trans) == null || !in_array(strtolower($is_trans), ['y','n']) ){
                         $this->info("Answer Not Found Please Choose From Up");
                         $this->info("------------------");
                         die;
                     }
                 }else{
-                    $ask3 = "n";
+                    $is_trans = "n";
                 }
-                if ($ask2 == "text" || $ask2 == "longText") {
-                    $ask_editor = $this->ask('Do You Want Editor For This Input (' . strtolower($ask1) . ') [ y, n ] :-');
+                if ($input_type == "text" || $input_type == "longText") {
+                    $ask_editor = $this->ask('Do You Want Editor For This Input (' . strtolower($input_name) . ') [ y, n ] :-');
                     if(strtolower($ask_editor) == null || !in_array(strtolower($ask_editor), ['y','n']) ){
                         $this->info("Answer Not Found Please Choose From Up");
                         $this->info("------------------");
@@ -169,31 +176,40 @@ class FComponent extends Command
                     }
                     if($ask_editor == "y"){
                         $this->model_inputs['editor'] = true;
-                        if(strtolower($ask3) == "y"){
-
-                $types = ['string', 'text', 'longText', 'date', 'dateTime', 'time', 'timestamp', 'json'];
-
+                        if(strtolower($is_trans) == "y"){
                             $type = "";
-                            if (in_array(strtolower($ask2), ['integer', 'tinyInteger', 'bigInteger', 'float', 'double', 'decimal'])) {
+                            if (in_array(strtolower($input_type), ['integer', 'tinyInteger', 'bigInteger', 'float', 'double', 'decimal'])) {
                                 $type = "number";
-                            }elseif (in_array(strtolower($ask2), ['string', 'text', 'longText'])) {
+                            }elseif (in_array(strtolower($input_type), ['string', 'text', 'longText'])) {
                                 $type = "textarea";
+                            }elseif (in_array(strtolower($input_type), ['dateTime', 'timestamp'])) {
+                                $type = "datetime-local";
                             }else{
-                                $type = strtolower($ask2);
+                                $type = strtolower($input_type);
                             }
                             $this->model_inputs['lang']['inputs'][] = [
-                                'label' => ucfirst($ask1),
-                                'name'  => strtolower($ask1),
+                                'label' => ucfirst($input_name),
+                                'name'  => strtolower($input_name),
                                 'type'  => $type,
                                 'value' => '',
                                 'editor' => true,
                             ];
                             $this->is_editor = true;
                         }else{
+                            $type = "";
+                            if (in_array(strtolower($input_type), ['integer', 'tinyInteger', 'bigInteger', 'float', 'double', 'decimal'])) {
+                                $type = "number";
+                            }elseif (in_array(strtolower($input_type), ['string', 'text', 'longText'])) {
+                                $type = "text";
+                            }elseif (in_array(strtolower($input_type), ['dateTime', 'timestamp'])) {
+                                $type = "datetime-local";
+                            }else{
+                                $type = strtolower($input_type);
+                            }
                             $this->model_inputs['inputs'][] = [
-                                'label' => ucfirst($ask1),
-                                'name'  => strtolower($ask1),
-                                'type'  => (in_array(strtolower($ask2), ['integer', 'tinyInteger', 'bigInteger', 'float', 'double', 'decimal'])) ? "number" : strtolower($ask2),
+                                'label' => ucfirst($input_name),
+                                'name'  => strtolower($input_name),
+                                'type'  => $type,
                                 'value' => '',
                                 'editor' => true,
                             ];
@@ -201,30 +217,30 @@ class FComponent extends Command
                     }
                 }
                 $ask_file_type = '';
-                if (strtolower($ask2) == "string") {
-                    $ask_file_upload = $this->ask('If This Input (' . strtolower($ask1) . ') Is File Upload ? [ y , n ] :-');
+                if (strtolower($input_type) == "string") {
+                    $ask_file_upload = $this->ask('If This Input (' . strtolower($input_name) . ') Is File Upload ? [ y , n ] :-');
                     if(strtolower($ask_file_upload) == null || !in_array(strtolower($ask_file_upload), ['y','n']) ){
                         $this->info("Answer Not Found Please Choose From Up");
                         $this->info("------------------");
                         die;
                     }
                     if($ask_file_upload == "y"){
-                        $ask_file_type = $this->ask('If This File Upload (' . strtolower($ask1) . ') Is :-  [ image , file ] :-');
+                        $ask_file_type = $this->ask('If This File Upload (' . strtolower($input_name) . ') Is :-  [ image , file ] :-');
                         if(strtolower($ask_file_type) == null || !in_array(strtolower($ask_file_type), ['image','file']) ){
                             $this->info("Answer Not Found Please Choose From Up");
                             $this->info("------------------");
                             die;
                         }
-                        $ask_file_multiple = $this->ask('If This File Upload (' . strtolower($ask1) . ') Is Multiple :-  [ y , n ] :-');
+                        $ask_file_multiple = $this->ask('If This File Upload (' . strtolower($input_name) . ') Is Multiple :-  [ y , n ] :-');
                         if(strtolower($ask_file_multiple) == null || !in_array(strtolower($ask_file_multiple), ['y','n']) ){
                             $this->info("Answer Not Found Please Choose From Up");
                             $this->info("------------------");
                             die;
                         }
                         $this->model_inputs['files'][] = [
-                            'label'         => ucfirst($ask1),
-                            'name'          => strtolower($ask1),
-                            'class'         => strtolower($ask1).'_'.strtolower($ask_file_type), // to call file input by class
+                            'label'         => ucfirst($input_name),
+                            'name'          => strtolower($input_name),
+                            'class'         => strtolower($input_name).'_'.strtolower($ask_file_type), // to call file input by class
                             'type'          => 'file', // image/video/file
                             'path'          => strtolower($ask_file_type).'_path', // to call file path
                             'delete_url'    => strtolower($this->argument('name')).'/remove_'.strtolower($ask_file_type).'/', // to delete file
@@ -234,32 +250,75 @@ class FComponent extends Command
                     }
                 }
 
+
+                if ($this->is_editor == false && $this->is_file == false) {
+                    $is_search = $this->ask('Do You Want This Input (' . strtolower($input_name) . ') In Search [ y , n ] :-');
+                    if(strtolower($is_search) == null || !in_array(strtolower($is_search), ['y','n']) ){
+                        $this->info("Answer Not Found Please Choose From Up");
+                        $this->info("------------------");
+                        die;
+                    }
+                    if ($is_search == "y") {
+                        $is_search_select = $this->ask('If This Input (' . strtolower($input_name) . ') Is Select [ y , n ] :-');
+                        if(strtolower($is_search_select) == null || !in_array(strtolower($is_search_select), ['y','n']) ){
+                            $this->info("Answer Not Found Please Choose From Up");
+                            $this->info("------------------");
+                            die;
+                        }
+                        if ($is_search_select == "y") {
+                            $this->model_search['inputs'][] = [
+                                'label' => ucfirst($input_name),
+                                'name'  => strtolower($input_name),
+                                'type'  => "select",
+                                'value' => ['1' => __("Active"),'0' => __("Un Active")],
+                            ];
+                        }else{
+                            $type = "";
+                            if (in_array(strtolower($input_type), ['integer', 'tinyInteger', 'bigInteger', 'float', 'double', 'decimal'])) {
+                                $type = "number";
+                            }elseif (in_array(strtolower($input_type), ['string', 'text', 'longText'])) {
+                                $type = "text";
+                            }elseif (in_array(strtolower($input_type), ['dateTime', 'timestamp'])) {
+                                $type = "datetime-local";
+                            }else{
+                                $type = strtolower($input_type);
+                            }
+                            $this->model_search['inputs'][] = [
+                                'label' => ucfirst($input_name),
+                                'name'  => strtolower($input_name),
+                                'type'  => $type,
+                                'value' => '',
+                            ];
+                        }
+                    }
+                }
+
                 $this->inputs[] = [
-                    'name'=>strtolower($ask1),
-                    'type'=>strtolower($ask2),
-                    'trans'=>strtolower($ask3),
+                    'name'  =>    strtolower($input_name),
+                    'type'  =>    strtolower($input_type),
+                    'trans' =>    strtolower($is_trans),
                 ];
 
                 if ($this->is_editor == false && $this->is_file == false) {
                     $type = "";
-                    if (in_array(strtolower($ask2), ['integer', 'tinyInteger', 'bigInteger', 'float', 'double', 'decimal'])) {
+                    if (in_array(strtolower($input_type), ['integer', 'tinyInteger', 'bigInteger', 'float', 'double', 'decimal'])) {
                         $type = "number";
-                    }elseif (in_array(strtolower($ask2), ['string', 'text', 'longText'])) {
+                    }elseif (in_array(strtolower($input_type), ['string', 'text', 'longText'])) {
                         $type = "text";
                     }else{
-                        $type = strtolower($ask2);
+                        $type = strtolower($input_type);
                     }
-                    if(strtolower($ask3) == "y"){
+                    if(strtolower($is_trans) == "y"){
                         $this->model_inputs['lang']['inputs'][] = [
-                            'label' => ucfirst($ask1),
-                            'name'  => strtolower($ask1),
+                            'label' => ucfirst($input_name),
+                            'name'  => strtolower($input_name),
                             'type'  => $type,
                             'value' => '',
                         ];
                     }else{
                         $this->model_inputs['inputs'][] = [
-                            'label' => ucfirst($ask1),
-                            'name'  => strtolower($ask1),
+                            'label' => ucfirst($input_name),
+                            'name'  => strtolower($input_name),
                             'type'  => $type,
                             'value' => '',
                         ];
@@ -269,38 +328,113 @@ class FComponent extends Command
                 $this->is_file      = false;
 
 
-                $types = ['integer', 'tinyInteger', 'bigInteger', 'float', 'double', 'decimal', 'date', 'dateTime', 'time', 'timestamp', 'json'];
+                $types = ['integer', 'tinyInteger', 'bigInteger', 'float', 'double', 'decimal', 'date', 'dateTime', 'time', 'timestamp'];
                 // Requests Validation Inputs
-                if (in_array($ask2, ['string', 'text', 'longText', 'date', 'dateTime', 'time', 'timestamp'])) {
-                    if (strtolower($ask2) == "string" && strtolower($ask_file_type) == 'image') {
-                        $this->requests_validation_inputs['normal'][strtolower($ask1)] = 'nullable|image|mimes:jpeg,png,jpg,gif,svg';
-                    }elseif (strtolower($ask2) == "string" && strtolower($ask_file_type) == 'file') {
-                        $this->requests_validation_inputs['normal'][strtolower($ask1)] = 'nullable|mimes:pdf';
+                if (in_array($input_type, ['string', 'text', 'longText', 'date', 'dateTime', 'time', 'timestamp'])) {
+                    if (strtolower($input_type) == "string" && strtolower($ask_file_type) == 'image') {
+                        $this->requests_validation_inputs['normal'][strtolower($input_name)] = 'nullable|image|mimes:jpeg,png,jpg,gif,svg';
+                    }elseif (strtolower($input_type) == "string" && strtolower($ask_file_type) == 'file') {
+                        $this->requests_validation_inputs['normal'][strtolower($input_name)] = 'nullable|mimes:pdf';
                     }else{
-                        if (strtolower($ask3) == "y") {
+                        if (strtolower($is_trans) == "y") {
                             foreach(app_languages() as $key => $value){
-                                $this->requests_validation_inputs['trans'][$key][$key.".".strtolower($ask1)] = "required|string|between:2,100";
+                                $this->requests_validation_inputs['trans'][$key][$key.".".strtolower($input_name)] = "required|string|between:2,100";
                             }
                         }else{
-                            $this->requests_validation_inputs['normal'][strtolower($ask1)] = 'required|string|between:2,100';
+                            $this->requests_validation_inputs['normal'][strtolower($input_name)] = 'required|string|between:2,100';
                         }
                     }
-                }elseif(in_array($ask2, ['integer', 'tinyInteger', 'bigInteger', 'float', 'double', 'decimal'])){
-                    $this->requests_validation_inputs['normal'][strtolower($ask1)] = 'required|min:6|max:255';
+                }elseif(in_array($input_type, ['integer', 'tinyInteger', 'bigInteger', 'float', 'double', 'decimal'])){
+                    $this->requests_validation_inputs['normal'][strtolower($input_name)] = 'required|min:6|max:255';
                 }else{
-                    $this->requests_validation_inputs['normal'][strtolower($ask1)] = 'required';
+                    $this->requests_validation_inputs['normal'][strtolower($input_name)] = 'required';
                 }
-                if (strtolower($ask3) == "y") {
-                    $this->requests_attributes_inputs['trans'][strtolower($ask1)] = __(ucfirst($ask1));
+                if (strtolower($is_trans) == "y") {
+                    $this->requests_attributes_inputs['trans'][strtolower($input_name)] = __(ucfirst($input_name));
                 }else{
-                    $this->requests_attributes_inputs['normal'][strtolower($ask1)] = __(rtrim($this->argument('name'),'s') . ' ' . ucfirst($ask1));
+                    $this->requests_attributes_inputs['normal'][strtolower($input_name)] = __(rtrim($this->argument('name'),'s') . ' ' . ucfirst($input_name));
                 }
-                $this->model_translatedAttributes .= strtolower($ask2).",";
+                $this->model_translatedAttributes .= strtolower($input_type).",";
             }
+
             $this->info('------------------');
             $this->createComponent();
         }
     }
+
+    // protected function getRelations(){
+    //     $components = glob(app_path() . '/Components/**');
+    //     $components_name = [];
+    //     $view_components_name = "";
+    //     foreach ($components as $key => $value) {
+    //         $path = explode('/',$value);
+    //         $component = $path[count($path) -1 ];
+    //         if ($component != "Admins") {
+    //             $components_name[] = $component;
+    //             if ($key == count($components)-1) {
+    //                 $view_components_name .= $component;
+    //             }else{
+    //                 $view_components_name .= $component . " , ";
+    //             }
+    //         }
+    //     }
+    //     $component_relation = $this->ask("Choose The Component You Want Do Relation With It : [ " . $view_components_name . " ]");
+    //     if($component_relation == null || !in_array($component_relation, $components_name) ){
+    //         $this->info("Answer Not Found Please Choose From Up");
+    //         $this->info("------------------");
+    //         die;
+    //     }
+
+    //     $all_inputs_components = glob(app_path() . '\Components\\'.$component_relation.'\Database\all_inputs.php');
+    //     $f = collect($all_inputs_components)->groupBy(
+    //         function ($el) {
+    //             return pathinfo($el)['filename'];
+    //         }
+    //     );
+    //     $f->transform(
+    //         function ($item) {
+    //             $data = [];
+    //             foreach ($item as $value) {
+    //                 $data[] = include $value;
+    //             }
+    //             return collect(array_filter($data));
+    //         }
+    //     );
+    //     $array = [];
+    //     $tables_array = [];
+    //     $tables_text = "";
+    //     $array_text = "";
+    //     foreach ($f->get('all_inputs')[0] as $k => $val) {
+    //         $tables_array[] = $k;
+    //         if ($k == count($f->get('all_inputs')[0])-1) {
+    //             $tables_text .= $k;
+    //         }else{
+    //             $tables_text .= $k . " , ";
+    //         }
+    //         foreach ($val as $t => $v) {
+    //             if ($t == count($val)-1) {
+    //                 $array_text .= $v;
+    //             }else{
+    //                 $array_text .= $v . " , ";
+    //             }
+    //             $array[$k][] = $v;
+    //         }
+    //     }
+
+    //     $table_name = $this->ask("Choose The Table You Want Do Relation With It : [ " . $tables_text . " ]");
+    //     if($table_name == null || !in_array($table_name, $tables_array) ){
+    //         $this->info("Answer Not Found Please Choose From Up");
+    //         $this->info("------------------");
+    //         die;
+    //     }
+    //     $column_name = $this->ask("Choose The Column You Want Do Relation With It : [ " . $array_text . " ]");
+    //     if($column_name == null || !in_array($column_name, $array[$table_name]) ){
+    //         $this->info("Answer Not Found Please Choose From Up");
+    //         $this->info("------------------");
+    //         die;
+    //     }
+    //     dd($table_name, $column_name);
+    // }
 
     protected function createComponent() {
         $name    = $this->argument('name');
@@ -546,6 +680,18 @@ class FComponent extends Command
                     $path.'/'.$val,
                     $this->compileMigrateStub('seeder',$dir)
                 );
+            }elseif(isset($val['all_inputs'])){
+                $dir = explode('/',$val['all_inputs']);
+                unset($dir[count($dir)-1]);
+                $dir = implode('/',$dir);
+                if (!is_dir($directory = $path.'/'.$dir)) {
+                    mkdir($directory, 0755, true);
+                }
+                $val = str_replace('AllInputs','all_inputs',$val['all_inputs']);
+                file_put_contents(
+                    $path.'/'.$val,
+                    $this->compileMigrateStub('all_inputs',$dir)
+                );
             }
         }
     }
@@ -558,14 +704,15 @@ class FComponent extends Command
             $table_name  = lcfirst($this->argument('name'));
             $table_id    = rtrim($table_name,'s');
             foreach($this->inputs as $input){
+                $all_inputs[] = $input['name'];
                 if ($input['trans'] == "y") {
-                    if (in_array($input['type'], ['string', 'text', 'longText', 'date', 'dateTime', 'time', 'timestamp', 'json'])) {
+                    if (in_array($input['type'], ['string', 'text', 'longText', 'date', 'dateTime', 'time', 'timestamp'])) {
                         $inputs_trans .= '$table->'.$input['type'].'(\''.$input['name'].'\')->nullable();'."\r\n";
                     }else{
                         $inputs_trans .= '$table->'.$input['type'].'(\''.$input['name'].'\')->default(0);'."\r\n";
                     }
                 }else{
-                    if (in_array($input['type'], ['string', 'text', 'longText', 'date', 'dateTime', 'time', 'timestamp', 'json'])) {
+                    if (in_array($input['type'], ['string', 'text', 'longText', 'date', 'dateTime', 'time', 'timestamp'])) {
                         $inputs .= '$table->'.$input['type'].'(\''.$input['name'].'\')->nullable();'."\r\n";
                     }else{
                         $inputs .= '$table->'.$input['type'].'(\''.$input['name'].'\')->default(0);'."\r\n";
@@ -577,7 +724,7 @@ class FComponent extends Command
                 [$name,$table_name,$table_id,$inputs,$inputs_trans],
                 file_get_contents(__DIR__.'/stubs/migrations/migrations'.$translate.'.stub')
             );
-        }else{
+        }elseif($type == 'seeder'){
             $namespace      = 'App\Components\\'.$this->argument('name').'\\'.str_replace('/','\\',$dir);
             $seeder_name    = $this->argument('name').'Seeder';
             return str_replace(
@@ -585,6 +732,17 @@ class FComponent extends Command
                 [$namespace,$seeder_name],
                 file_get_contents(__DIR__.'/stubs/migrations/seeders.stub')
             );
+        }elseif($type == 'all_inputs'){
+            $all_inputs = [];
+            foreach($this->inputs as $input){
+                $all_inputs[] = $input['name'];
+            }
+            return str_replace(
+                ['{{all_inputs}}'],
+                [$this->varexport($all_inputs,true)],
+                file_get_contents(__DIR__.'/stubs/migrations/all_inputs.stub')
+            );
+
         }
     }
 
@@ -626,17 +784,26 @@ class FComponent extends Command
         $component_id           = rtrim(lcfirst($this->argument('name')),'s');
         $model_name_small       = lcfirst($this->argument('name'));
         $model_name_big         = rtrim($this->argument('name'),'s');
+        $image_method = "";
+        if (count($this->model_inputs['files'])) {
+                foreach ($this->model_inputs['files'] as $file) {
+                    $image_method .= 'public function get'.$file['label'].'PathAttribute(){ '."\r\n";
+                    $image_method .= 'return $this->'.$file['name'].' ? url($this->'.$file['name'].') : url(\'assets/logo.svg\');'."\r\n";
+                    $image_method .= '} '."\r\n";
+                }
+        }
+
         if($translate == 0) {
             return str_replace(
-                ['{{namespace}}','{{component_name}}','{{component_id}}','{{model_name_small}}','{{model_name_big}}','{{model_inputs}}'],
-                [$namespace,$component_name,$component_id,$model_name_small,$model_name_big,$this->varexport($this->model_inputs,true)],
+                ['{{namespace}}','{{component_name}}','{{component_id}}','{{model_name_small}}','{{model_name_big}}','{{model_inputs}}','{{model_search}}','{{image_method}}'],
+                [$namespace,$component_name,$component_id,$model_name_small,$model_name_big,$this->varexport($this->model_inputs,true),$this->varexport($this->model_search,true),$image_method],
                 file_get_contents(__DIR__.'/stubs/models/normal/model.stub')
             );
         } else {
             if ($file == "model") {
                 return str_replace(
-                    ['{{namespace}}','{{component_name}}','{{component_id}}','{{model_name_small}}','{{model_name_big}}','{{model_inputs}}','{{model_translatedAttributes}}'],
-                    [$namespace,$component_name,$component_id,$model_name_small,$model_name_big,$this->varexport($this->model_inputs,true),$this->model_translatedAttributes],
+                    ['{{namespace}}','{{component_name}}','{{component_id}}','{{model_name_small}}','{{model_name_big}}','{{model_inputs}}','{{model_translatedAttributes}}','{{model_search}}','{{image_method}}'],
+                    [$namespace,$component_name,$component_id,$model_name_small,$model_name_big,$this->varexport($this->model_inputs,true),$this->model_translatedAttributes,$this->varexport($this->model_search,true),$image_method],
                     file_get_contents(__DIR__.'/stubs/models/translate/'.$file.'.stub')
                 );
             }else{
@@ -852,7 +1019,7 @@ class FComponent extends Command
        $nn = explode('/',$nn);
        $nn = $nn[count($nn)-1];
        if ($file_name == 'admin.php') {
-        $directory      = 'App\Components\\'.$this->argument('name').'\Controllers\Dashboard\DashboardController';
+        $directory      = 'App\Components\\'.$this->argument('name').'\Controllers\Dashboard';
        }elseif ($file_name == 'api.php') {
         $directory      = 'App\Components\\'.$this->argument('name').'\Controllers\Api\ApiController';
        }elseif ($file_name == 'web.php') {
@@ -863,9 +1030,15 @@ class FComponent extends Command
        $model_obj       = rtrim($name,'s');
 
        $file_name = str_replace('.php', '.stub',$file_name);
+       $image_link_remove = "";
+       if (count($this->model_inputs['files'])) {
+            foreach ($this->model_inputs['files'] as $file) {
+                $image_link_remove .= "Route::get('".$name."/remove_".$file['name']."/".$model_obj."', [".$directory."\DashboardController::class, 'remove_".$file['name']."'])->name('".$name.".remove_".$file['name']."');\r\n";
+            }
+       }
        return str_replace(
-           ['{{directory}}','{{name}}','{{model_obj}}'],
-           [$directory,$name,$model_obj],
+           ['{{directory}}','{{name}}','{{model_obj}}','{{image_link_remove}}'],
+           [$directory,$name,$model_obj,$image_link_remove],
            file_get_contents(__DIR__.'/stubs/route/'.$file_name)
        );
     }

@@ -20,26 +20,8 @@ class {{model_name_big}} extends Model {
     }
 
     public static function FORM_SEARCH(){
-        return [
-            'inputs' => [
-                [
-                    'label' => 'Status',
-                    'name'  => 'is_active',
-                    'type'  => 'select',
-                    'value' => ['1' => __("Active"),'0' => __("Un Active")],
-                ],
-                [
-                    'label' => 'Created At',
-                    'name'  => 'created_at',
-                    'type'  => 'date',
-                    'value' => '',
-                ],
-            ]
-        ];
+        return {{model_search}};
     }
 
-    public function getImagePathAttribute()
-    {
-        return $this->image ? url($this->image) : url('assets/logo.svg');
-    }
+    {{image_method}}
 }

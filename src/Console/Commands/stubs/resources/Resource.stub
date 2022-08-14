@@ -16,8 +16,6 @@ class {{file_name}} extends JsonResource
     {
         return [
             'id'                => (int) $this->id,
-            'image'             => (string) $this->image_path,
-            'title'             => (string) $this->title ?? '',
         ];
     }
 }
