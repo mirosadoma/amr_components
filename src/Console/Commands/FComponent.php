@@ -786,11 +786,11 @@ class FComponent extends Command
         $model_name_big         = rtrim($this->argument('name'),'s');
         $image_method = "";
         if (count($this->model_inputs['files'])) {
-                foreach ($this->model_inputs['files'] as $file) {
-                    $image_method .= 'public function get'.$file['label'].'PathAttribute(){ '."\r\n";
-                    $image_method .= 'return $this->'.$file['name'].' ? url($this->'.$file['name'].') : url(\'assets/logo.svg\');'."\r\n";
-                    $image_method .= '} '."\r\n";
-                }
+            foreach ($this->model_inputs['files'] as $model_input_file) {
+                $image_method .= 'public function get'.$model_input_file['label'].'PathAttribute(){ '."\r\n";
+                $image_method .= 'return $this->'.$model_input_file['name'].' ? url($this->'.$model_input_file['name'].') : url(\'assets/logo.svg\');'."\r\n";
+                $image_method .= '} '."\r\n";
+            }
         }
 
         if($translate == 0) {
