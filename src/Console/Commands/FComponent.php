@@ -788,7 +788,7 @@ class FComponent extends Command
         $model_name_small       = lcfirst($this->argument('name'));
         $model_name_big         = rtrim($this->argument('name'),'s');
         $image_method = "";
-        if (count($this->model_inputs['files'])) {
+        if (isset($this->model_inputs['files']) && count($this->model_inputs['files'])) {
             foreach ($this->model_inputs['files'] as $model_input_file) {
                 $image_method .= 'public function get'.$model_input_file['label'].'PathAttribute(){ '."\r\n";
                 $image_method .= 'return $this->'.$model_input_file['name'].' ? url($this->'.$model_input_file['name'].') : url(\'assets/logo.svg\');'."\r\n";
@@ -1034,7 +1034,7 @@ class FComponent extends Command
 
        $file_name = str_replace('.php', '.stub',$file_name);
        $image_link_remove = "";
-       if (count($this->model_inputs['files'])) {
+       if (isset($this->model_inputs['files']) && count($this->model_inputs['files'])) {
             foreach ($this->model_inputs['files'] as $file) {
                 $image_link_remove .= "Route::get('".$name."/remove_".$file['name']."/".$model_obj."', [".$directory."\DashboardController::class, 'remove_".$file['name']."'])->name('".$name.".remove_".$file['name']."');\r\n";
             }
