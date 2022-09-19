@@ -92,6 +92,7 @@ class AmrServiceProvider extends ServiceProvider {
             __DIR__.'/views/emails' => resource_path('views/emails'),
             __DIR__.'/views/errors' => resource_path('views/errors'),
             __DIR__.'/views/vendor' => resource_path('views/vendor'),
+            __DIR__.'/views/site' => resource_path('views/site'),
             __DIR__.'/Controllers' => app_path('Http/Controllers'),
             __DIR__.'/Components' => app_path('Components'),
             __DIR__.'/Model' => app_path('/Models'),
@@ -226,7 +227,7 @@ class AmrServiceProvider extends ServiceProvider {
         if (!request()->is('*app*')) {
             return;
         }
-        $dashboard = Route::prefix(LaravelLocalization::setLocale().'/');
+        $dashboard = Route::middleware('web')->prefix(LaravelLocalization::setLocale().'/');
         $dashboard->group(function () {
             Route::get('/', [SiteMainController::class, 'index'])->name('home');// Done
             Route::get('/app/login', [DashboardAuthController::class, 'loginPage'])->name('login');// Done

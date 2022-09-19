@@ -354,9 +354,12 @@ class FComponent extends Command
                 }else{
                     $this->requests_attributes_inputs['normal'][strtolower($input_name)] = __(rtrim($this->argument('name'),'s') . ' ' . ucfirst($input_name));
                 }
-                $this->model_translatedAttributes .= strtolower($input_type).",";
+                if(strtolower($is_trans) == "y"){
+                    $this->model_translatedAttributes .= "'" .strtolower($input_name)."',";
+                }else{
+                    $is_trans = "n";
+                }
             }
-
             $this->info('------------------');
             $this->createComponent();
         }
