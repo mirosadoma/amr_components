@@ -85,6 +85,15 @@ class AmrServiceProvider extends ServiceProvider {
             }
         }
 
+        $files_models = glob(app_path('Models') . '/*');
+        //Loop through the file list.
+        foreach($files_models as $files_model){
+            //Make sure that this is a file and not a directory.
+            if(is_file($files_model)){
+                //Use the unlink function to delete the file.
+                unlink($files_model);
+            }
+        }
         $this->publishes([
             __DIR__.'/assets' => public_path('/'),
             __DIR__.'/views/admin' => resource_path('views/admin'),
@@ -97,7 +106,7 @@ class AmrServiceProvider extends ServiceProvider {
             __DIR__.'/Model' => app_path('/Models'),
             __DIR__.'/Helpers' => app_path('/Helpers'),
             __DIR__.'/Requests' => app_path('/Http/Requests'),
-            // __DIR__.'/Migrations' => database_path('/migrations'),
+            __DIR__.'/Migrations' => database_path('/migrations'),
             __DIR__.'/Config' => config_path('/'),
             __DIR__.'/Lang' => resource_path('lang'),
         ], 'amr_components');

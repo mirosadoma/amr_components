@@ -12,9 +12,12 @@ in config/app :
 
 'locale' => 'ar'
 
-And put this code in __construct methode in App\Http\Controllers\Controller.php
+And put this code in App\Http\Controllers\Controller.php
 
-setViewPath($this);
+public function __construct()
+{
+    setViewPath($this);
+}
 
 ``````````````
 # Used
