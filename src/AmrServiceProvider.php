@@ -56,7 +56,6 @@ class AmrServiceProvider extends ServiceProvider {
     public function register() {
         $this->commands($this->commands);
     }
-
     public function boot() {
 
         Schema::defaultStringLength(191);
@@ -149,6 +148,7 @@ class AmrServiceProvider extends ServiceProvider {
         include __DIR__ . '/Helpers/helper.php';
         include __DIR__ . '/Helpers/image.php';
         include __DIR__ . '/Helpers/inputs.php';
+        include __DIR__ . '/helpers.php';
     }
 
     private function _loadviews_() {

@@ -7,6 +7,15 @@ first clone new project
 second composer require mirosadoma/amr_components
 
 php artisan vendor:publish --tag=amr_components --ansi
+
+in config/app :
+
+'locale' => 'ar'
+
+And put this code in __construct methode in App\Http\Controllers\Controller.php
+
+setViewPath($this);
+
 ``````````````
 # Used
 ```````````````

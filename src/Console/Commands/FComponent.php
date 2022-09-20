@@ -241,7 +241,7 @@ class FComponent extends Command
                             'label'         => ucfirst($input_name),
                             'name'          => strtolower($input_name),
                             'class'         => strtolower($input_name).'_'.strtolower($ask_file_type), // to call file input by class
-                            'type'          => 'file', // image/video/file
+                            'type'          => strtolower($ask_file_type), // image/video/file
                             'path'          => strtolower($ask_file_type).'_path', // to call file path
                             'delete_url'    => strtolower($this->argument('name')).'/remove_'.strtolower($ask_file_type).'/', // to delete file
                             'multiple'      => $ask_file_multiple == "y" ? true : false, // file/files
@@ -345,14 +345,14 @@ class FComponent extends Command
                         }
                     }
                 }elseif(in_array($input_type, ['integer', 'tinyInteger', 'bigInteger', 'float', 'double', 'decimal'])){
-                    $this->requests_validation_inputs['normal'][strtolower($input_name)] = 'required|min:6|max:255';
+                    $this->requests_validation_inputs['normal'][strtolower($input_name)] = 'required|min:2|numeric|not_in:0';
                 }else{
                     $this->requests_validation_inputs['normal'][strtolower($input_name)] = 'required';
                 }
                 if (strtolower($is_trans) == "y") {
-                    $this->requests_attributes_inputs['trans'][strtolower($input_name)] = __(ucfirst($input_name));
+                    $this->requests_attributes_inputs['trans'][strtolower($input_name)] = ucfirst($input_name);
                 }else{
-                    $this->requests_attributes_inputs['normal'][strtolower($input_name)] = __(rtrim($this->argument('name'),'s') . ' ' . ucfirst($input_name));
+                    $this->requests_attributes_inputs['normal'][strtolower($input_name)] = rtrim($this->argument('name'),'s') . ' ' . ucfirst($input_name);
                 }
                 if(strtolower($is_trans) == "y"){
                     $this->model_translatedAttributes .= "'" .strtolower($input_name)."',";
@@ -614,10 +614,37 @@ class FComponent extends Command
         $update_request         = $control[0].'\\'.$control[1].'\\'.$control[2].'\\Requests\\Dashboard\\UpdateRequest';
         $update_request_name    = 'UpdateRequest';
         if ($type == 'dashboard') {
+            $file_store = "";
+            $file_update = "";
+            $file_methode_remove = "";
+            if (isset($this->model_inputs['files']) && count($this->model_inputs['files'])) {
+                foreach ($this->model_inputs['files'] as $model_input_file) {
+                    $file_store .= 'if (request()->has("'.$model_input_file['name'].'")) { '."\r\n";
+                    $file_store .= '$data["'.$model_input_file['name'].'"]  = imageUpload($request->'.$model_input_file['name'].', "'.$route.'");'."\r\n";
+                    $file_store .= '} '."\r\n";
+                    $file_update .= 'if (request()->has("'.$model_input_file['name'].'")) { '."\r\n";
+                    $file_update .= '$data["'.$model_input_file['name'].'"] = imageUpload($request->'.$model_input_file['name'].', "'.$route.'", [], false, true, $'.$lcfirst.'->'.$model_input_file['name'].');'."\r\n";
+                    $file_update .= '}else{ '."\r\n";
+                    $file_update .= 'unset($data["'.$model_input_file['name'].'"]);'."\r\n";
+                    $file_update .= '} '."\r\n";
+
+                    $file_methode_remove .= 'public function remove_'.$model_input_file['name'].'($'.$lcfirst.') { '."\r\n";
+                    $file_methode_remove .= '$'.$lcfirst.' = '.$model_name.'::find($'.$lcfirst.'); '."\r\n";
+                    $file_methode_remove .= 'DeleteImage($'.$lcfirst.'->'.$model_input_file['name'].'); '."\r\n";
+                    $file_methode_remove .= '$'.$lcfirst.'->update([ '."\r\n";
+                    $file_methode_remove .= '\''.$model_input_file['name'].'\' => null '."\r\n";
+                    $file_methode_remove .= ']); '."\r\n";
+                    $file_methode_remove .= 'return response()->json([ '."\r\n";
+                    $file_methode_remove .= '\'message\' => __(\'Image Deleted Successfully\'), '."\r\n";
+                    $file_methode_remove .= ']); '."\r\n";
+                    $file_methode_remove .= '} '."\r\n";
+                }
+            }
+
             $controlar_name = "Dashboard";
             return str_replace(
-                ['{{namespace}}','{{controlar_name}}','{{view}}','{{route}}','{{model}}','{{lcfirst}}','{{view_name}}','{{model_name}}','{{store_request}}','{{store_request_name}}','{{update_request}}','{{update_request_name}}'],
-                [$directory,$controlar_name,$view,$route,$model,$lcfirst,$view_name,$model_name,$store_request,$store_request_name,$update_request,$update_request_name],
+                ['{{namespace}}','{{controlar_name}}','{{view}}','{{route}}','{{model}}','{{lcfirst}}','{{view_name}}','{{model_name}}','{{store_request}}','{{store_request_name}}','{{update_request}}','{{update_request_name}}','{{file_store}}','{{file_update}}','{{file_methode_remove}}'],
+                [$directory,$controlar_name,$view,$route,$model,$lcfirst,$view_name,$model_name,$store_request,$store_request_name,$update_request,$update_request_name,$file_store,$file_update, $file_methode_remove],
                 file_get_contents(__DIR__.'/stubs/controllers/dashboard.stub')
             );
         }elseif($type == 'locales'){
@@ -1034,14 +1061,15 @@ class FComponent extends Command
 
        $file_name = str_replace('.php', '.stub',$file_name);
        $image_link_remove = "";
+       $is_active = "Route::get('".$name."/is_active/{".$model_obj."}', [".$directory."\DashboardController::class, 'is_active'])->name('".$name.".is_active');\r\n";;
        if (isset($this->model_inputs['files']) && count($this->model_inputs['files'])) {
             foreach ($this->model_inputs['files'] as $file) {
-                $image_link_remove .= "Route::get('".$name."/remove_".$file['name']."/".$model_obj."', [".$directory."\DashboardController::class, 'remove_".$file['name']."'])->name('".$name.".remove_".$file['name']."');\r\n";
+                $image_link_remove .= "Route::get('".$name."/remove_".$file['name']."/{".$model_obj."}', [".$directory."\DashboardController::class, 'remove_".$file['name']."'])->name('".$name.".remove_".$file['name']."');\r\n";
             }
        }
        return str_replace(
-           ['{{directory}}','{{name}}','{{model_obj}}','{{image_link_remove}}'],
-           [$directory,$name,$model_obj,$image_link_remove],
+           ['{{directory}}','{{name}}','{{model_obj}}','{{image_link_remove}}','{{is_active}}'],
+           [$directory,$name,$model_obj,$image_link_remove,$is_active],
            file_get_contents(__DIR__.'/stubs/route/'.$file_name)
        );
     }

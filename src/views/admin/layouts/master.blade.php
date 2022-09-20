@@ -9,7 +9,7 @@
     <meta name="keywords" content="admin template, Vuexy admin template, dashboard template, flat admin template, responsive admin template, web app">
     <meta name="author" content="PIXINVENT">
     <base href="{{asset('assets')}}/">
-    <title>@lang(env('APP_NAME')) - @yield('head_title')</title>
+    <title>@lang('My_Dashboard') - @yield('head_title')</title>
     @include('admin.layouts.inc.styles')
     <!-- BEGIN: loader-->
     {!! assetAdmin('app-assets/loader/loader.css','css') !!}

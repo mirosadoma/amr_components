@@ -83,9 +83,7 @@ class {{controlar_name}}Controller extends Controller
             return abort(403);
         }
         $data = $request->all();
-        if (request()->has('image')) {
-            $data['image']  = imageUpload($request->image, '{{route}}');
-        }
+        {{file_store}}
         $data['is_active'] = 1;
         {{model_name}}::create($data);
         return redirect()->route('app.{{route}}.index')->with('success', __('Data Saved Successfully'));
@@ -154,11 +152,7 @@ class {{controlar_name}}Controller extends Controller
             return abort(403);
         }
         $data = $request->all();
-        if (request()->has('image')) {
-            $data['image']      = imageUpload($request->image, '{{route}}', [], false, true, ${{lcfirst}}->image);
-        }else{
-            unset($data['image']);
-        }
+        {{file_update}}
         ${{lcfirst}}->update($data);
         return redirect()->route('app.{{route}}.index')->with('success', __('Data Updated Successfully'));
     }
@@ -182,14 +176,5 @@ class {{controlar_name}}Controller extends Controller
         return redirect()->back()->with('success', __('Status Updated Successfully'));
     }
 
-    public function remove_image(${{lcfirst}}) {
-        ${{lcfirst}} = {{model_name}}::find(${{lcfirst}});
-        DeleteImage(${{lcfirst}}->image);
-        ${{lcfirst}}->update([
-            'image' => null
-        ]);
-        return response()->json([
-            'message' => __('Image Deleted Successfully'),
-        ]);
-    }
+    {{file_methode_remove}}
 }

@@ -9,4 +9,5 @@ Route::prefix('/{{name}}')->name('{{name}}.')->group(function () {
 
 // {{name}} Area
 Route::resource('{{name}}', {{directory}}\DashboardController::class);
+{{is_active}}
 {{image_link_remove}}

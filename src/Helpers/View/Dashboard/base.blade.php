@@ -70,7 +70,7 @@
                         allowedFileExtensions = ['pdf'];
                     }else{
                         type = 'image';
-                        allowedFileExtensions = ['jpg', 'png', 'gif'];
+                        allowedFileExtensions = ['jpg', 'png', 'gif', 'jpeg'];
                     }
                     $("."+"{{$item['class']}}").fileinput({
                         allowedFileExtensions: allowedFileExtensions,
@@ -93,7 +93,7 @@
                         allowedFileExtensions = ['pdf'];
                     }else{
                         type = 'image';
-                        allowedFileExtensions = ['jpg', 'png', 'gif'];
+                        allowedFileExtensions = ['jpg', 'png', 'gif', 'jpeg'];
                     }
                     @if(isset($info))
                         @if(!is_array($info->{$item['name']}))
