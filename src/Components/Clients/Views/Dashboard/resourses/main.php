@@ -6,5 +6,5 @@ return [
     'color'         => 'blue',
     'url'           => route('app.clients.index'),
     'permission'    => 'clients',
-    'count'         => \App\Models\User::where('type', 'client')->count()
+    'count'         => \App\Models\Client::where('type', 'client')->count()
 ];

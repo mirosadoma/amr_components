@@ -5,7 +5,7 @@ namespace App\Components\Clients\Controllers\Dashboard;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 // Models
-use App\Models\User;
+use App\Models\Client;
 use App\Components\Cities\Models\City;
 use App\Components\Countries\Models\Country;
 // Requests
@@ -32,8 +32,8 @@ class ClientsController extends Controller {
                 'icon'  => 'plus'
             ];
         }
-        $search  = User::FORM_SEARCH();
-        $lists = User::query()->where('type', 'client');
+        $search  = Client::FORM_SEARCH();
+        $lists = Client::query()->where('type', 'client');
         if (request()->has('filter') && request('filter') != 0) {
             if (request()->has('name') && !empty(request('name'))) {
                 $lists->where('name', 'LIKE', '%'.request('name').'%');
@@ -96,7 +96,7 @@ class ClientsController extends Controller {
             'type'          => 'create',
             'back_route'    => route('app.clients.index')
         ];
-        $data  = User::FORM_INPUTS();
+        $data  = Client::FORM_INPUTS();
         $data = array_merge($data,$array);
         return view('Clients_Dashboard::action',get_defined_vars());
     }
@@ -112,7 +112,7 @@ class ClientsController extends Controller {
         $data['password']   = bcrypt($request->password);
         $data['type']       = 'client';
         $data['is_active']  = 1;
-        $client              = User::create($data);
+        $client              = Client::create($data);
         return redirect()->route('app.clients.index')->with('success', __('Data Saved Successfully'));
     }
 
@@ -137,7 +137,7 @@ class ClientsController extends Controller {
             'route'         =>  'clients.index',
             'icon'          => 'arrow-left'
         ];
-        $client = User::withTrashed()->find($client);
+        $client = Client::withTrashed()->find($client);
         $info  = $client;
         $array = [
             'title'         => $PageTitle,
@@ -147,7 +147,7 @@ class ClientsController extends Controller {
             'type'          => 'update',
             'back_route'    => route('app.clients.index')
         ];
-        $data  = User::FORM_INPUTS();
+        $data  = Client::FORM_INPUTS();
         $data = array_merge($data,$array);
         return view('Clients_Dashboard::action',get_defined_vars());
     }
@@ -156,7 +156,7 @@ class ClientsController extends Controller {
         if (!permissionCheck('clients.update')) {
             return abort(403);
         }
-        $client = User::withTrashed()->find($client);
+        $client = Client::withTrashed()->find($client);
         $data = $request->all();
         if (request()->has('image')) {
             $data['image']      = imageUpload($request->image, 'clients', [], false, true, $client->image);
@@ -177,7 +177,7 @@ class ClientsController extends Controller {
         if (!permissionCheck('clients.delete')) {
             return abort(403);
         }
-        $client = User::withTrashed()->find($client);
+        $client = Client::withTrashed()->find($client);
         $client->delete();
         return redirect()->route('app.clients.index')->with('success', __('Data Deleted Successfully'));
     }
@@ -186,7 +186,7 @@ class ClientsController extends Controller {
         if (!permissionCheck('clients.delete')) {
             return abort(403);
         }
-        $client = User::withTrashed()->find($client);
+        $client = Client::withTrashed()->find($client);
         DeleteImage($client->image);
         $client->forceDelete();
         return redirect()->back()->with('success', __('Data Deleted Forever Successfully'));
@@ -196,14 +196,14 @@ class ClientsController extends Controller {
         if (!permissionCheck('clients.delete')) {
             return abort(403);
         }
-        $client = User::withTrashed()->find($client);
+        $client = Client::withTrashed()->find($client);
         $client->restore();
         return redirect()->back()->with('success', __('Data Restore Successfully'));
     }
 
     public function is_active($client)
     {
-        $client = User::withTrashed()->find($client);
+        $client = Client::withTrashed()->find($client);
         if ($client->is_active == 0) {
             $client->update(['is_active' => 1]);
         }else{
@@ -213,7 +213,7 @@ class ClientsController extends Controller {
     }
 
     public function remove_image($client) {
-        $client = User::withTrashed()->find($client);
+        $client = Client::withTrashed()->find($client);
         DeleteImage($client->image);
         $client->update([
             'image' => null

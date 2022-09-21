@@ -75,41 +75,44 @@ class AmrServiceProvider extends ServiceProvider {
         $this->loadWebRoutesSite();
         $this->loadApiRoute();
 
-        $files = glob(database_path('migrations') . '/*');
-        //Loop through the file list.
-        foreach($files as $file){
-            //Make sure that this is a file and not a directory.
-            if(is_file($file)){
-                //Use the unlink function to delete the file.
-                unlink($file);
-            }
-        }
+        if ($this->app->runningInConsole()) {
+            // $files = glob(database_path('migrations') . '/*');
+            // //Loop through the file list.
+            // foreach($files as $file){
+            //     //Make sure that this is a file and not a directory.
+            //     if(is_file($file)){
+            //         //Use the unlink function to delete the file.
+            //        unlink($file);
+            //     }
+            // }
 
-        $files_models = glob(app_path('Models') . '/*');
-        //Loop through the file list.
-        foreach($files_models as $files_model){
-            //Make sure that this is a file and not a directory.
-            if(is_file($files_model)){
-                //Use the unlink function to delete the file.
-                unlink($files_model);
-            }
+            // $files_models = glob(app_path('Models') . '/*');
+            // //Loop through the file list.
+            // foreach($files_models as $files_model){
+            //     //Make sure that this is a file and not a directory.
+            //     if(is_file($files_model)){
+            //         //Use the unlink function to delete the file.
+            //         unlink($files_model);
+            //     }
+            // }
+
+            $this->publishes([
+                __DIR__.'/assets' => public_path('/'),
+                __DIR__.'/views/admin' => resource_path('views/admin'),
+                __DIR__.'/views/emails' => resource_path('views/emails'),
+                __DIR__.'/views/errors' => resource_path('views/errors'),
+                __DIR__.'/views/vendor' => resource_path('views/vendor'),
+                __DIR__.'/views/site' => resource_path('views/site'),
+                __DIR__.'/Controllers' => app_path('Http/Controllers'),
+                __DIR__.'/Components' => app_path('Components'),
+                __DIR__.'/Model' => app_path('/Models'),
+                __DIR__.'/Helpers' => app_path('/Helpers'),
+                __DIR__.'/Requests' => app_path('/Http/Requests'),
+                __DIR__.'/Migrations' => database_path('/migrations'),
+                __DIR__.'/Config' => config_path('/'),
+                __DIR__.'/Lang' => resource_path('lang'),
+            ], 'amr_components');
         }
-        $this->publishes([
-            __DIR__.'/assets' => public_path('/'),
-            __DIR__.'/views/admin' => resource_path('views/admin'),
-            __DIR__.'/views/emails' => resource_path('views/emails'),
-            __DIR__.'/views/errors' => resource_path('views/errors'),
-            __DIR__.'/views/vendor' => resource_path('views/vendor'),
-            __DIR__.'/views/site' => resource_path('views/site'),
-            __DIR__.'/Controllers' => app_path('Http/Controllers'),
-            __DIR__.'/Components' => app_path('Components'),
-            __DIR__.'/Model' => app_path('/Models'),
-            __DIR__.'/Helpers' => app_path('/Helpers'),
-            __DIR__.'/Requests' => app_path('/Http/Requests'),
-            __DIR__.'/Migrations' => database_path('/migrations'),
-            __DIR__.'/Config' => config_path('/'),
-            __DIR__.'/Lang' => resource_path('lang'),
-        ], 'amr_components');
 
         $router = $this->app->make(Router::class);
         $router->aliasMiddleware('active', ActiveMiddleware::class);

@@ -6,6 +6,8 @@ first clone new project
 
 second composer require mirosadoma/amr_components
 
+** remove all migrations in database/migrations make it empty
+
 php artisan vendor:publish --tag=amr_components --ansi
 
 in config/app :
@@ -121,5 +123,9 @@ The End Message Is : {component_name} Component Created
 ````````````````
 # ENV
 ```````````````
-GOOGLE_API_KEY=GOOHELASASDASDASDASSDS
+
+MAP_KEY : Like This In .env File: -
+
+MAP_KEY=AIzaSyBGBnkYBV7LW1eqj8gBTw50t7OB6FB5-p0
+
 ```````````````

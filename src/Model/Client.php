@@ -11,23 +11,12 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use App\Components\Cities\Models\City;
 
-class User extends Authenticatable
+class Client extends Authenticatable
 {
     use HasFactory, Notifiable, HasRoles, SoftDeletes;
 
     public static function FORM_INPUTS(){
         return [
-            // 'editor'=>'editor',
-            // 'lang' => [
-            //     'inputs' => [
-            //         [
-            //             'label' => 'Desc',
-            //             'name'  => 'desc',
-            //             'type'  => 'textarea',
-            //             'editor' => true,
-            //         ],
-            //     ]
-            // ],
             'inputs' => [
                 [
                     'label'         => 'Name',
@@ -54,17 +43,11 @@ class User extends Authenticatable
                     'name'          => 'password_confirmation',
                     'type'          => 'password',
                 ],
-                [
-                    'label'         => 'Cities',
-                    'name'          => 'city_id',
-                    'type'          => 'select',
-                    'options'       => City::all()
-                ],
                 // [
-                //     'label' => 'Desc',
-                //     'name'  => 'desc',
-                //     'type'  => 'textarea',
-                //     'editor' => true,
+                //     'label'         => 'Cities',
+                //     'name'          => 'city_id',
+                //     'type'          => 'select',
+                //     'options'       => City::all()
                 // ],
             ],
             'files' => [
@@ -127,7 +110,7 @@ class User extends Authenticatable
     protected $dates = ['deleted_at'];
 
     protected $table = "users";
-    
+
     protected $guarded = ['id'];
 
     Protected $guard_name ='admin';
@@ -160,10 +143,10 @@ class User extends Authenticatable
         return $this->image ? url($this->image) : url('assets/logo.svg');
     }
 
-    public function city()
-    {
-        return $this->belongsTo(City::class);
-    }
+    // public function city()
+    // {
+    //     return $this->belongsTo(City::class);
+    // }
 
     public function parent()
     {

@@ -117,28 +117,28 @@ class FComponent extends Command
 
     public function handle() {
         if($this->argument('name') == 'default') {
-            $this->info('Component Name Missing');
+            $this->info('Component Name Missing'. "\n");
         } else {
             // $this->getRelations();
-
+            $main = $this->output->createProgressBar(100);
             if (!preg_match('~^\p{Lu}~u', $this->argument('name'))) {
-                $this->info("------------------");
-                $this->info("Note :- Your Component Should Has First Letter UberCase");
-                $this->info("------------------");
+                $this->info("------------------". "\n");
+                $this->info("Note :- Your Component Should Has First Letter UberCase". "\n");
+                $this->info("------------------". "\n");
                 die;
             }
 
             if (!str_ends_with($this->argument('name'),'s')) {
-                $this->info("------------------");
-                $this->info("Note :- Your Component Should Ends With 's'");
-                $this->info("------------------");
+                $this->info("------------------". "\n");
+                $this->info("Note :- Your Component Should Ends With 's'". "\n");
+                $this->info("------------------". "\n");
                 die;
             }
 
             $ask = $this->ask('What Is The Count Of Your Inputs');
             if(strtolower($ask) == null || !is_numeric($ask)) {
-                $this->info("Not Choosen");
-                $this->info("------------------");
+                $this->info("Not Choosen". "\n");
+                $this->info("------------------". "\n");
                 die;
             }
 
@@ -146,22 +146,22 @@ class FComponent extends Command
             for ($i=1; $i <= $this->inputs_count; $i++) {
                 $input_name = $this->ask('Please Write The Name Of Input ' . $i . ' :-');
                 if(strtolower($input_name) == null) {
-                    $this->info("Not Choosen");
-                    $this->info("------------------");
+                    $this->info("Not Choosen". "\n");
+                    $this->info("------------------". "\n");
                     die;
                 }
                 $types = ['string', 'integer', 'tinyInteger', 'bigInteger', 'float', 'double', 'decimal', 'text', 'longText', 'date', 'dateTime', 'time', 'timestamp'];
                 $input_type = $this->ask('Please Write The Type Of Input (' . strtolower($input_name) . ') In Table [ string, integer, tinyInteger, bigInteger, float, double, decimal, text, longText, date, dateTime, time, timestamp ] :-');
                 if($input_type == null || !in_array($input_type, $types) ){
-                    $this->info("Type Not Found Please Choose From Up");
-                    $this->info("------------------");
+                    $this->info("Type Not Found Please Choose From Up". "\n");
+                    $this->info("------------------". "\n");
                     die;
                 }
                 if (!in_array($input_type, ['integer', 'tinyInteger', 'bigInteger', 'float', 'double', 'decimal', 'date', 'dateTime', 'time', 'timestamp'])) {
                     $is_trans = $this->ask('Please Write If The Input (' . strtolower($input_name) . ') Is Translation Or Not [ y , n ] :-');
                     if(strtolower($is_trans) == null || !in_array(strtolower($is_trans), ['y','n']) ){
-                        $this->info("Answer Not Found Please Choose From Up");
-                        $this->info("------------------");
+                        $this->info("Answer Not Found Please Choose From Up". "\n");
+                        $this->info("------------------". "\n");
                         die;
                     }
                 }else{
@@ -170,8 +170,8 @@ class FComponent extends Command
                 if ($input_type == "text" || $input_type == "longText") {
                     $ask_editor = $this->ask('Do You Want Editor For This Input (' . strtolower($input_name) . ') [ y, n ] :-');
                     if(strtolower($ask_editor) == null || !in_array(strtolower($ask_editor), ['y','n']) ){
-                        $this->info("Answer Not Found Please Choose From Up");
-                        $this->info("------------------");
+                        $this->info("Answer Not Found Please Choose From Up". "\n");
+                        $this->info("------------------". "\n");
                         die;
                     }
                     if($ask_editor == "y"){
@@ -220,21 +220,21 @@ class FComponent extends Command
                 if (strtolower($input_type) == "string") {
                     $ask_file_upload = $this->ask('If This Input (' . strtolower($input_name) . ') Is File Upload ? [ y , n ] :-');
                     if(strtolower($ask_file_upload) == null || !in_array(strtolower($ask_file_upload), ['y','n']) ){
-                        $this->info("Answer Not Found Please Choose From Up");
-                        $this->info("------------------");
+                        $this->info("Answer Not Found Please Choose From Up". "\n");
+                        $this->info("------------------". "\n");
                         die;
                     }
                     if($ask_file_upload == "y"){
                         $ask_file_type = $this->ask('If This File Upload (' . strtolower($input_name) . ') Is :-  [ image , file ] :-');
                         if(strtolower($ask_file_type) == null || !in_array(strtolower($ask_file_type), ['image','file']) ){
-                            $this->info("Answer Not Found Please Choose From Up");
-                            $this->info("------------------");
+                            $this->info("Answer Not Found Please Choose From Up". "\n");
+                            $this->info("------------------". "\n");
                             die;
                         }
                         $ask_file_multiple = $this->ask('If This File Upload (' . strtolower($input_name) . ') Is Multiple :-  [ y , n ] :-');
                         if(strtolower($ask_file_multiple) == null || !in_array(strtolower($ask_file_multiple), ['y','n']) ){
-                            $this->info("Answer Not Found Please Choose From Up");
-                            $this->info("------------------");
+                            $this->info("Answer Not Found Please Choose From Up". "\n");
+                            $this->info("------------------". "\n");
                             die;
                         }
                         $this->model_inputs['files'][] = [
@@ -254,15 +254,15 @@ class FComponent extends Command
                 if ($this->is_editor == false && $this->is_file == false) {
                     $is_search = $this->ask('Do You Want This Input (' . strtolower($input_name) . ') In Search [ y , n ] :-');
                     if(strtolower($is_search) == null || !in_array(strtolower($is_search), ['y','n']) ){
-                        $this->info("Answer Not Found Please Choose From Up");
-                        $this->info("------------------");
+                        $this->info("Answer Not Found Please Choose From Up". "\n");
+                        $this->info("------------------". "\n");
                         die;
                     }
                     if ($is_search == "y") {
                         $is_search_select = $this->ask('If This Input (' . strtolower($input_name) . ') Is Select [ y , n ] :-');
                         if(strtolower($is_search_select) == null || !in_array(strtolower($is_search_select), ['y','n']) ){
-                            $this->info("Answer Not Found Please Choose From Up");
-                            $this->info("------------------");
+                            $this->info("Answer Not Found Please Choose From Up". "\n");
+                            $this->info("------------------". "\n");
                             die;
                         }
                         if ($is_search_select == "y") {
@@ -360,7 +360,7 @@ class FComponent extends Command
                     $is_trans = "n";
                 }
             }
-            $this->info('------------------');
+            $this->info('------------------'. "\n");
             $this->createComponent();
         }
     }
@@ -383,15 +383,15 @@ class FComponent extends Command
     //     }
     //     $component_relation = $this->ask("Choose The Component You Want Do Relation With It : [ " . $view_components_name . " ]");
     //     if($component_relation == null || !in_array($component_relation, $components_name) ){
-    //         $this->info("Answer Not Found Please Choose From Up");
-    //         $this->info("------------------");
+    //         $this->info("Answer Not Found Please Choose From Up". "\n");
+    //         $this->info("------------------". "\n");
     //         die;
     //     }
 
     //     $all_inputs_components = glob(app_path() . '\Components\\'.$component_relation.'\Database\all_inputs.php');
     //     $f = collect($all_inputs_components)->groupBy(
     //         function ($el) {
-    //             return pathinfo($el)['filename'];
+    //             return pathinfo($el)['filename'. "\n"];
     //         }
     //     );
     //     $f->transform(
@@ -426,14 +426,14 @@ class FComponent extends Command
 
     //     $table_name = $this->ask("Choose The Table You Want Do Relation With It : [ " . $tables_text . " ]");
     //     if($table_name == null || !in_array($table_name, $tables_array) ){
-    //         $this->info("Answer Not Found Please Choose From Up");
-    //         $this->info("------------------");
+    //         $this->info("Answer Not Found Please Choose From Up". "\n");
+    //         $this->info("------------------". "\n");
     //         die;
     //     }
     //     $column_name = $this->ask("Choose The Column You Want Do Relation With It : [ " . $array_text . " ]");
     //     if($column_name == null || !in_array($column_name, $array[$table_name]) ){
-    //         $this->info("Answer Not Found Please Choose From Up");
-    //         $this->info("------------------");
+    //         $this->info("Answer Not Found Please Choose From Up". "\n");
+    //         $this->info("------------------". "\n");
     //         die;
     //     }
     //     dd($table_name, $column_name);
@@ -450,8 +450,8 @@ class FComponent extends Command
         //         $ask = $this->ask('Choose [Y | N] Please , You Want '.$key.' ? [Y | N]');
         //     }
         //     if(lcfirst($ask) == null) {
-        //         $this->info("Not Choosen");
-        //         $this->info("------------------");
+        //         $this->info("Not Choosen". "\n");
+        //         $this->info("------------------". "\n");
         //         die;
         //     }
         //     if(lcfirst($ask) != 'y') {
@@ -468,19 +468,19 @@ class FComponent extends Command
         }
         // $ask = $this->ask('You Want Make Translate ? [Y | N]');
         // if(lcfirst($ask) == null) {
-        //     $this->info("Not Choosen");
-        //     $this->info("------------------");
+        //     $this->info("Not Choosen". "\n");
+        //     $this->info("------------------". "\n");
         //     die;
         // }
         // if(lcfirst($ask) == 'y') {
         //     $this->translate = true;
         // }
         if (count($stubMap) == 0) {
-            $this->info("Component Create Stop");
+            $this->info("Component Create Stop". "\n");
             die;
         }
         $this->createDirectories($stubMap);
-        $this->info($name.' Component Created');
+        $this->info($name.' Component Created'. "\n");
         die;
     }
 
@@ -501,7 +501,7 @@ class FComponent extends Command
             if(lcfirst($ask) == 'y') {
                $this->exportComponent($map);
             } else {
-                $this->info('Component Create Stop');
+                $this->info('Component Create Stop'. "\n");
                 die;
             }
         } else {

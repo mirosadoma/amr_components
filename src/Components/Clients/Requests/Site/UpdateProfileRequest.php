@@ -28,7 +28,7 @@ class UpdateProfileRequest extends FormRequest
             'city_id'               => __('City'),
         ];
     }
-    
+
     public function messages()
     {
         return [
@@ -45,9 +45,9 @@ class UpdateProfileRequest extends FormRequest
     public function rules()
     {
         return [
-            'name'                  => 'required|regex:/^[\p{Arabic}a-zA-Z ]+$/u|string|between:2,100|unique:users,name,'.$this->user,
-            'email'                 => 'required|email:filter|between:2,200|unique:users,email,'.$this->user,
-            'phone'                 => 'required|digits:9|regex:/^(5)?([0-9]){2}([0-9]){6}$/|unique:users,phone,'.$this->user,
+            'name'                  => 'required|regex:/^[\p{Arabic}a-zA-Z ]+$/u|string|between:2,100|unique:users,name,'.$this->client,
+            'email'                 => 'required|email:filter|between:2,200|unique:users,email,'.$this->client,
+            'phone'                 => 'required|digits:9|regex:/^(5)?([0-9]){2}([0-9]){6}$/|unique:users,phone,'.$this->client,
             'image'                 => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
             'gender'               => 'required|exists:cities,id',
             "gender"  => [
